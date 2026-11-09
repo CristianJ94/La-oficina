@@ -50,6 +50,7 @@
     dani: { hair: '#D9692B', skin: '#F2C6A0', shirt: '#3FB66B', style: 'short' },
     inspector: { hair: '#6B5640', skin: '#E9BE96', shirt: '#C9A46C', style: 'hat' },
     gabinete: { hair: '#A7B0BC', skin: '#EDC5A3', shirt: '#2F4B7C', style: 'bun' },
+    marilyn: { hair: '#F6D36B', skin: '#F6CFAF', shirt: '#25D366', style: 'long' },
     cristian: { hair: '#2B221C', skin: '#E5B48C', shirt: '#1F2A44', style: 'short', tie: '#E5484D' }
   };
   function headSVG(cx, cy, L, r = 13) {
@@ -96,10 +97,10 @@
   }
 
   // ---------- plano ----------
-  const DESK = { lucia: [0.9, 2.0], olga: [3.0, 2.0], marta: [5.1, 2.0], dani: [0.9, 4.4], inspector: [3.0, 4.4], gabinete: [5.1, 4.4] };
-  const ROW = { lucia: 1, olga: 1, marta: 1, dani: 2, inspector: 2, gabinete: 2 };
+  const DESK = { lucia: [0.9, 2.0], olga: [3.0, 2.0], marta: [5.1, 2.0], dani: [0.9, 4.4], inspector: [3.0, 4.4], gabinete: [5.1, 4.4], marilyn: [3.0, 6.7] };
+  const ROW = { lucia: 1, olga: 1, marta: 1, dani: 2, inspector: 2, gabinete: 2, marilyn: 3 };
   const LANES = { 1: 1.0, 2: 3.45, 3: 6.05 };
-  const seatOf = (id) => ({ x: DESK[id][0] + .85, y: DESK[id][1] - .3, lane: ROW[id] === 1 ? 1 : 2, kind: 'seat' });
+  const seatOf = (id) => ({ x: DESK[id][0] + .85, y: DESK[id][1] - .3, lane: ROW[id], kind: 'seat' });
   const POI = {
     cafe: { x: 5.85, y: 1.0, lane: 1, kind: 'cafe' },
     ventana: { x: 2.6, y: 0.75, lane: 1, kind: 'ventana' },

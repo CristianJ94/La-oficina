@@ -9,7 +9,7 @@
     set(k, v) { try { localStorage.setItem('lo.' + k, JSON.stringify(v)); } catch (e) { /* sin almacenamiento */ } }
   };
 
-  const ORDER = ['lucia', 'olga', 'marta', 'dani', 'inspector', 'gabinete'];
+  const ORDER = ['lucia', 'olga', 'marta', 'dani', 'marilyn', 'inspector', 'gabinete'];
   const AV = (id) => 'icons/av_' + (ORDER.includes(id) || id === 'cristian' ? id : 'cristian') + '.svg';
   const ESTADO = { trabajando: 'Trabajando', esperando: 'Te espera', alerta: 'Alerta', libre: 'Libre', fuera: 'Sin cubrir' };
   const PRIO = { esperando: 0, alerta: 1, trabajando: 2, libre: 3, fuera: 9 };
@@ -44,10 +44,13 @@
         olga: { name: 'Olga', role: 'Analista · métricas', status: 'esperando', task: 'Análisis DSP WK45 listo para enviar', lastAction: 'Dejó el análisis para aprobar', lastAt: ago(12), next: 'Mensajes DA de la semana', schedule: 'Cuando le pases el scorecard', autonomy: 'Prepara; nunca envía', doneWeek: 4 },
         marta: { name: 'Marta', role: 'Selección y entrevistas', status: 'libre', task: '', lastAction: 'Cargó 18 candidatos de la WK46', lastAt: ago(95), next: 'Entrevistas DMZ4 del jueves', schedule: 'A demanda (WK##)', autonomy: 'Prepara; no descarta a nadie', doneWeek: 2 },
         dani: { name: 'Dani', role: 'Onboarding', status: 'alerta', task: 'Revisando diplomas pendientes', lastAction: 'Preparó MIGRAR 09/11', lastAt: ago(30), next: 'Carpetas INCORPORACIONES', schedule: 'L–V 9:10', autonomy: 'Renombra y mueve; no borra ni envía', doneWeek: 5 },
+        marilyn: { name: 'Marilyn', role: 'WhatsApp de empresa', status: 'esperando', task: '', lastAction: 'Leyó 9 chats nuevos', lastAt: ago(8), next: 'Próxima ronda a las 12:02', schedule: 'L–V cada hora, de 9:02 a 18:02', autonomy: 'Lee y avisa; solo envía lo que tú apruebas', doneWeek: 6 },
         inspector: { name: 'El Inspector', role: 'Auditoría y alertas', status: 'fuera' },
         gabinete: { name: 'Jefa de gabinete', role: 'Parte diario', status: 'fuera' }
       },
       approvals: [
+        { id: 'w1', agent: 'marilyn', kind: 'libre', at: ago(8), nombre: 'Jorge Ruiz', fechas: ['19/11/2026'], what: 'Jorge Ruiz pide librar el 19/11', detail: 'Motivo: cita en el banco. Centro por confirmar.', priority: 'media', decision: 'pendiente' },
+        { id: 'w2', agent: 'marilyn', kind: 'libre', at: ago(20), nombre: 'Sara Gil', fechas: ['21/11/2026', '22/11/2026'], station: 'VAD4', rrhhName: 'SARA GIL MORENO', what: 'Sara Gil Moreno pide librar el 21/11 y 22/11', detail: 'Motivo: boda familiar. Centro: VAD4.', priority: 'media', decision: 'pendiente' },
         { id: 'e1', agent: 'olga', at: ago(12), what: 'Enviar el Análisis DSP WK45 a Amazon', to: 'Amazon', detail: 'DCR, DSC DPMO y POD con causa raíz y plan de acción. Solo Transporter IDs.', priority: 'alta', decision: 'pendiente' },
         { id: 'e2', agent: 'lucia', at: ago(40), what: 'Responder a Angel sobre asistencia VAD7', to: 'Angel Martín', detail: 'Borrador listo en Outlook.', priority: 'media', decision: 'pendiente' },
         { id: 'e3', agent: 'dani', at: ago(120), what: 'Carpeta MIGRAR 09/11 · 12 diplomas', to: 'Amazon', priority: 'baja', decision: 'aprobado', decidedAt: ago(110) }
@@ -57,6 +60,7 @@
         { id: 'a2', agent: 'lucia', at: ago(150), level: 'amarillo', station: 'Outlook', text: '2 emails de Amazon sin responder desde hace 48 h', action: 'Revisar los borradores', state: 'abierta' }
       ],
       log: [
+        { id: 'l0', agent: 'marilyn', at: ago(8), text: 'leyó 9 chats: 2 peticiones de día libre, 1 aviso de retraso', state: 'pendiente' },
         { id: 'l1', agent: 'lucia', at: ago(4), text: 'repartió 23 emails: 4 a Olga, 6 a Marta, 3 a Dani', state: 'ok' },
         { id: 'l2', agent: 'olga', at: ago(12), text: 'dejó el análisis WK45 para aprobar', state: 'pendiente' },
         { id: 'l3', agent: 'dani', at: ago(30), text: 'avisó: 3 conductores sin diploma desde hace 7 días', state: 'error' },
@@ -187,10 +191,21 @@
     const link = x.link ? ` <a href="${esc(x.link)}" target="_blank" rel="noopener">Abrir</a>` : '';
     const det = (x.detail || '') + (x.to ? (x.detail ? ' ' : '') + 'Para: ' + x.to + '.' : '');
     const ok = x.decision === 'aprobado';
+    if (x.kind === 'libre') return cardLibre(x, pending);
     const foot = pending
       ? `<div class="acts"><button class="btn back" data-dec="devuelto" data-id="${esc(x.id)}">Devolver</button><button class="btn approve" data-dec="aprobado" data-id="${esc(x.id)}">Aprobar</button></div>`
       : `<span class="stamp ${ok ? 'ok' : 'no'}"><svg viewBox="0 0 24 24" aria-hidden="true">${ok ? '<path d="m5 12 4 4 10-10"/>' : '<path d="M6 6l12 12M18 6 6 18"/>'}</svg>${ok ? 'Aprobado' : 'Devuelto'} · ${esc(hm(x.decidedAt))}</span>`;
     return `<article class="card${fresh('ap' + x.id + (pending ? 'p' : 'd'))}" id="card-${esc(x.id)}"><div class="head"><img src="${AV(x.agent)}" alt=""><span class="who"><b>${esc(name(x.agent))}</b><small>${esc(rel(x.at))}</small></span>${prio}</div><div class="what">${esc(x.what)}</div>${det || link ? `<div class="det">${esc(det)}${link}</div>` : ''}${foot}</article>`;
+  }
+
+  function cardLibre(x, pending) {
+    const st = x.station ? `<span class="pill centro">${esc(x.station)}</span>` : '<span class="pill esperando">Centro por confirmar</span>';
+    const ok = x.decision === 'aprobado';
+    const foot = pending
+      ? `<div class="acts"><button class="btn back" data-libre="devuelto" data-id="${esc(x.id)}">Denegar</button><button class="btn approve" data-libre="aprobado" data-id="${esc(x.id)}">Aceptar</button></div>`
+      : `<span class="stamp ${ok ? 'ok' : 'no'}"><svg viewBox="0 0 24 24" aria-hidden="true">${ok ? '<path d="m5 12 4 4 10-10"/>' : '<path d="M6 6l12 12M18 6 6 18"/>'}</svg>${ok ? 'Aceptado' + (x.station ? ' · fucsia en ' + esc(x.station) : '') : 'Denegado'} · ${esc(hm(x.decidedAt))}</span>`;
+    const msg = !pending && x.mensaje ? `<div class="det">${(S.outbox || []).some((o) => o.approvalId === x.id && o.sent) ? 'Mensaje enviado' : 'Marilyn enviará'}: «${esc(x.mensaje)}»</div>` : '';
+    return `<article class="card libre${fresh('ap' + x.id + (pending ? 'p' : 'd'))}" id="card-${esc(x.id)}"><div class="head"><img src="${AV(x.agent)}" alt=""><span class="who"><b>${esc(name(x.agent))} · día libre</b><small>${esc(rel(x.at))}</small></span>${st}</div><div class="what">${esc(x.what)}</div>${x.detail ? `<div class="det">${esc(x.detail)}</div>` : ''}${msg}${foot}</article>`;
   }
 
   function renderLog(open) {
@@ -252,6 +267,63 @@
     try { const j = await post({ action: 'decidir', id, decision: dec }); if (j) { S = j; store.set('cache', j); } }
     catch (e) { S = before; render(); toast('No se pudo guardar. Revisa la conexión e inténtalo otra vez.'); }
   }
+  // Días libres: espera al servidor (pinta en RRHH) y, si hace falta, pregunta centro o nombre.
+  async function decideLibre(id, dec, extra) {
+    const x = (S.approvals || []).find((a) => a.id === id); if (!x) return;
+    const cardEl = $('card-' + id); cardEl && cardEl.querySelectorAll('button').forEach((b) => (b.disabled = true));
+    if (dec === 'aprobado' && !x.station && !(extra && extra.station)) { askCentro(x, dec); return; }
+    let j;
+    try {
+      if (cfg.demo) j = demoLibre(x, dec, extra || {});
+      else {
+        const r = await fetch(cfg.url, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify({ clave: cfg.clave, action: 'decidir', id, decision: dec, ...(extra || {}) }) });
+        j = await r.json();
+      }
+    } catch (e) { render(); toast('No se pudo guardar. Revisa la conexión e inténtalo otra vez.'); return; }
+    if (j && j.pedir) { askCentro(x, dec, j); return; }
+    if (j && j.error) { render(); toast(j.error); return; }
+    if (j && !cfg.demo) { S = j; store.set('cache', j); }
+    const y = (S.approvals || []).find((a) => a.id === id) || x;
+    if (cardEl) cardEl.classList.add('leaving');
+    office.decision(x.agent, dec === 'aprobado');
+    toast(dec === 'aprobado' ? 'Marcado en fucsia en RRHH ' + (y.station || '') + '. Marilyn se lo dirá en su próxima ronda.' : 'Denegado. Marilyn se lo dirá en su próxima ronda.');
+    setTimeout(render, RM ? 0 : 900);
+  }
+  function demoLibre(x, dec, extra) {
+    if (extra.station) { x.station = extra.station; x.detail = (x.detail || '').replace('Centro por confirmar.', 'Centro: ' + extra.station + '.'); }
+    if (extra.nombre) x.rrhhName = extra.nombre;
+    x.decision = dec; x.decidedAt = new Date().toISOString();
+    const pila = (x.nombre || '').split(' ')[0], f = (x.fechas || []).map((t) => t.split('/').slice(0, 2).join('/')).join(' y ');
+    x.mensaje = dec === 'aprobado' ? `Hola ${pila}, se ha aceptado tu petición de día libre para el ${f}. ¡Un saludo!` : `Hola ${pila}, se ha denegado tu solicitud de día libre para el ${f} por motivos de volumen. Un saludo.`;
+    (S.log = S.log || []).unshift({ id: 'c' + Date.now(), agent: 'cristian', at: x.decidedAt, text: (dec === 'aprobado' ? 'aceptó: ' : 'denegó: ') + x.what, state: 'ok' });
+    return null;
+  }
+  // Ventana para elegir centro (y nombre en RRHH si no lo encuentra)
+  function askCentro(x, dec, res) {
+    const dlg = $('pick');
+    const centro = (res && res.centro) || x.station || '';
+    $('p-title').textContent = res && res.pedir === 'nombre' ? '¿Cuál es en el RRHH?' : '¿De qué centro es ' + (x.nombre || 'este conductor') + '?';
+    $('p-msg').textContent = res && res.error && res.pedir === 'nombre' ? res.error : (res && res.error && !/^¿/.test(res.error) ? res.error : 'Lo marco en fucsia en su RRHH y Marilyn lo recordará para la próxima vez.');
+    $('p-centros').innerHTML = ['VAD7', 'VAD4', 'DMZ4'].map((c) => `<button type="button" class="seg" aria-pressed="${c === centro}" data-c="${c}">${c}</button>`).join('');
+    $('p-nombre').value = x.rrhhName || x.nombre || '';
+    const cands = (res && res.candidatos) || [];
+    $('p-cands').innerHTML = cands.map((n) => `<button type="button" class="cand" data-n="${esc(n)}">${esc(n)}</button>`).join('');
+    $('p-cands').hidden = !cands.length;
+    $('p-ok').textContent = dec === 'aprobado' ? 'Aceptar y marcar' : 'Denegar';
+    dlg.dataset.pid = x.id; dlg.dataset.pdec = dec;
+    try { dlg.showModal(); } catch (e) { dlg.setAttribute('open', ''); }
+  }
+  $('p-centros') && $('p-centros').addEventListener('click', (e) => { const b = e.target.closest('[data-c]'); if (!b) return; $('p-centros').querySelectorAll('button').forEach((q) => q.setAttribute('aria-pressed', q === b)); });
+  $('p-cands') && $('p-cands').addEventListener('click', (e) => { const b = e.target.closest('[data-n]'); if (b) $('p-nombre').value = b.dataset.n; });
+  $('p-cancel') && ($('p-cancel').onclick = () => { $('pick').close(); render(); });
+  $('p-ok') && ($('p-ok').onclick = () => {
+    const dlg = $('pick'), c = $('p-centros').querySelector('[aria-pressed="true"]');
+    if (!c) { toast('Elige el centro'); return; }
+    const nombre = $('p-nombre').value.trim();
+    dlg.close();
+    decideLibre(dlg.dataset.pid, dlg.dataset.pdec, { station: c.dataset.c, nombre });
+  });
+
   async function resolve(id, btn) {
     const x = (S.alerts || []).find((a) => a.id === id); if (!x) return;
     const el = $('al-' + id); btn.disabled = true; el && el.classList.add('leaving');
@@ -274,10 +346,11 @@
   }
   window.addEventListener('popstate', () => go((location.hash || '#oficina').slice(1), false));
   document.addEventListener('click', (e) => {
-    const t = e.target.closest('[data-go],[data-agent],[data-dec],[data-resolve],[data-filter]');
+    const t = e.target.closest('[data-go],[data-agent],[data-dec],[data-libre],[data-resolve],[data-filter]');
     if (!t) return;
     if (t.dataset.go) go(t.dataset.go);
     else if (t.dataset.agent) openAgent(t.dataset.agent);
+    else if (t.dataset.libre) decideLibre(t.dataset.id, t.dataset.libre);
     else if (t.dataset.dec) decide(t.dataset.id, t.dataset.dec, t);
     else if (t.dataset.resolve) resolve(t.dataset.resolve, t);
     else if (t.dataset.filter) { filter = t.dataset.filter; renderLog((S.alerts || []).filter((x) => (x.state || 'abierta') === 'abierta')); }

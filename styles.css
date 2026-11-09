@@ -273,3 +273,17 @@ h1, h2, h3 { font-family: var(--f-display); font-weight: 600; margin: 0; text-wr
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after, ::backdrop { animation: none !important; transition: none !important; }
 }
+
+/* días libres (Marilyn) */
+.pill.centro { background: #FCE7FB; color: #A3009F; }
+.card.libre { border-left: 4px solid #ff00ff; }
+.pick h2 { font: 600 22px/1.2 Fredoka, sans-serif; margin: 6px 0 4px; }
+.p-msg { color: var(--muted); margin: 0 0 14px; font-size: 14px; }
+.segs { display: flex; gap: 8px; margin-bottom: 14px; }
+.seg { flex: 1; text-align: center; min-height: 52px; border-radius: 14px; border: 1.5px solid var(--line); background: #fff; font-weight: 700; font-size: 16px; }
+.seg[aria-pressed="true"] { background: #ff00ff; border-color: #ff00ff; color: #fff; }
+.p-lab { display: block; font-size: 13px; color: var(--muted); margin-bottom: 6px; }
+.p-in { width: 100%; min-height: 46px; border-radius: 12px; border: 1.5px solid var(--line); padding: 0 12px; font: 600 16px Inter, sans-serif; text-transform: uppercase; }
+.cands { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
+.cand { border: 1.5px solid var(--line); background: #F7F9FC; border-radius: 999px; padding: 8px 12px; font-size: 13px; font-weight: 600; }
+.pick .acts { display: flex; gap: 8px; margin-top: 18px; }

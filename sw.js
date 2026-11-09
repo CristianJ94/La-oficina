@@ -1,8 +1,8 @@
 /* La Oficina — service worker: abre sin conexión y gestiona los avisos */
-const VERSION = 'lo-v1';
+const VERSION = 'lo-v2';
 const SHELL = ['./', 'index.html', 'styles.css', 'app.js', 'office.js', 'manifest.webmanifest',
   'icons/icon-192.png', 'icons/icon-512.png', 'icons/apple-touch-icon.png', 'icons/favicon.svg',
-  'icons/av_lucia.svg', 'icons/av_olga.svg', 'icons/av_marta.svg', 'icons/av_dani.svg',
+  'icons/av_lucia.svg', 'icons/av_olga.svg', 'icons/av_marta.svg', 'icons/av_dani.svg', 'icons/av_marilyn.svg',
   'icons/av_inspector.svg', 'icons/av_gabinete.svg', 'icons/av_cristian.svg'];
 
 self.addEventListener('install', (e) => {

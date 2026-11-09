@@ -115,6 +115,17 @@
   <dl class="s-kv" id="s-kv"></dl>
 </dialog>
 
+<dialog class="sheet pick" id="pick" aria-labelledby="p-title">
+  <div class="grab" aria-hidden="true"></div>
+  <h2 id="p-title">¿De qué centro es?</h2>
+  <p class="p-msg" id="p-msg"></p>
+  <div class="segs" id="p-centros" role="group" aria-label="Centro"></div>
+  <label class="p-lab" for="p-nombre">Nombre en el RRHH</label>
+  <input id="p-nombre" class="p-in" autocomplete="off" autocapitalize="characters">
+  <div class="cands" id="p-cands" hidden></div>
+  <div class="acts"><button class="btn back" id="p-cancel" type="button">Cancelar</button><button class="btn approve" id="p-ok" type="button">Aceptar y marcar</button></div>
+</dialog>
+
 <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
 
 <script src="office.js"></script>
