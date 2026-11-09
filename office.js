@@ -45,7 +45,7 @@
   // ---------- personajes ----------
   const LOOK = {
     lucia: { hair: '#6B3E26', skin: '#F4C9A3', shirt: '#22B5A8', style: 'long' },
-    olga: { hair: '#F2C14E', skin: '#F8D8BC', shirt: '#8B5CF6', style: 'bun' },
+    ana: { hair: '#4A2C1D', skin: '#F3CDB0', shirt: '#8B5CF6', style: 'bun' },
     marta: { hair: '#2A2430', skin: '#D9A07A', shirt: '#F0524F', style: 'long' },
     dani: { hair: '#D9692B', skin: '#F2C6A0', shirt: '#3FB66B', style: 'short' },
     inspector: { hair: '#6B5640', skin: '#E9BE96', shirt: '#C9A46C', style: 'hat' },
@@ -97,8 +97,8 @@
   }
 
   // ---------- plano ----------
-  const DESK = { lucia: [0.9, 2.0], olga: [3.0, 2.0], marta: [5.1, 2.0], dani: [0.9, 4.4], inspector: [3.0, 4.4], gabinete: [5.1, 4.4], marilyn: [3.0, 6.7] };
-  const ROW = { lucia: 1, olga: 1, marta: 1, dani: 2, inspector: 2, gabinete: 2, marilyn: 3 };
+  const DESK = { lucia: [0.9, 2.0], ana: [3.0, 2.0], marta: [5.1, 2.0], dani: [0.9, 4.4], inspector: [3.0, 4.4], gabinete: [5.1, 4.4], marilyn: [3.0, 6.7] };
+  const ROW = { lucia: 1, ana: 1, marta: 1, dani: 2, inspector: 2, gabinete: 2, marilyn: 3 };
   const LANES = { 1: 1.0, 2: 3.45, 3: 6.05 };
   const seatOf = (id) => ({ x: DESK[id][0] + .85, y: DESK[id][1] - .3, lane: ROW[id], kind: 'seat' });
   const POI = {

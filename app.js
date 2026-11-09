@@ -9,7 +9,7 @@
     set(k, v) { try { localStorage.setItem('lo.' + k, JSON.stringify(v)); } catch (e) { /* sin almacenamiento */ } }
   };
 
-  const ORDER = ['lucia', 'olga', 'marta', 'dani', 'marilyn', 'inspector', 'gabinete'];
+  const ORDER = ['lucia', 'ana', 'marta', 'dani', 'marilyn', 'inspector', 'gabinete'];
   const AV = (id) => 'icons/av_' + (ORDER.includes(id) || id === 'cristian' ? id : 'cristian') + '.svg';
   const ESTADO = { trabajando: 'Trabajando', esperando: 'Te espera', alerta: 'Alerta', libre: 'Libre', fuera: 'Sin cubrir' };
   const PRIO = { esperando: 0, alerta: 1, trabajando: 2, libre: 3, fuera: 9 };
@@ -41,7 +41,7 @@
       demo: true, updatedAt: ago(0),
       agents: {
         lucia: { name: 'Lucía', role: 'Recepción · email', status: 'trabajando', task: 'Revisando Outlook · 23 hilos nuevos', lastAction: 'Repartió 23 emails', lastAt: ago(4), next: 'Revisión de tarde a las 15:45', schedule: 'L–V 7:45 y 15:45', autonomy: 'Categoriza y deja borradores; no envía', doneWeek: 3 },
-        olga: { name: 'Olga', role: 'Analista · métricas', status: 'esperando', task: 'Análisis DSP WK45 listo para enviar', lastAction: 'Dejó el análisis para aprobar', lastAt: ago(12), next: 'Mensajes DA de la semana', schedule: 'Cuando le pases el scorecard', autonomy: 'Prepara; nunca envía', doneWeek: 4 },
+        ana: { name: 'Ana', role: 'Métricas y scorecard', status: 'esperando', task: 'Análisis DSP WK45 listo para enviar', lastAction: 'Dejó el análisis para aprobar', lastAt: ago(12), next: 'Mensajes DA de la semana', schedule: 'Cuando le pases el scorecard', autonomy: 'Prepara; nunca envía', doneWeek: 4 },
         marta: { name: 'Marta', role: 'Selección y entrevistas', status: 'libre', task: '', lastAction: 'Cargó 18 candidatos de la WK46', lastAt: ago(95), next: 'Entrevistas DMZ4 del jueves', schedule: 'A demanda (WK##)', autonomy: 'Prepara; no descarta a nadie', doneWeek: 2 },
         dani: { name: 'Dani', role: 'Onboarding', status: 'alerta', task: 'Revisando diplomas pendientes', lastAction: 'Preparó MIGRAR 09/11', lastAt: ago(30), next: 'Carpetas INCORPORACIONES', schedule: 'L–V 9:10', autonomy: 'Renombra y mueve; no borra ni envía', doneWeek: 5 },
         marilyn: { name: 'Marilyn', role: 'WhatsApp de empresa', status: 'esperando', task: '', lastAction: 'Leyó 9 chats nuevos', lastAt: ago(8), next: 'Próxima ronda a las 12:02', schedule: 'L–V cada hora, de 9:02 a 18:02', autonomy: 'Lee y avisa; solo envía lo que tú apruebas', doneWeek: 6 },
@@ -49,9 +49,10 @@
         gabinete: { name: 'Jefa de gabinete', role: 'Parte diario', status: 'fuera' }
       },
       approvals: [
+        { id: 'd1', agent: 'ana', kind: 'lote', at: ago(15), station: 'VAD7', what: 'Daily metrics VAD7 · 3 conductores con fallos', detail: 'Reclamaciones y POD de los días 8 y 9/11.', priority: 'media', decision: 'pendiente', mensajes: [{ id: '1', nombre: 'Jorge Alonso', text: 'Hola Jorge. Soy Cristian, compañero de Álvaro y Antonio y responsable de calidad y métricas de la estación. Ayer tuviste 1 paquete que el cliente dice no haber recibido: ES2644343859 · Hogar · 31 m ⚠️ · SIN contacto. MARCAJES SIEMPRE EN EL PUNTO y pregunta siempre el nombre de quien recibe.' }, { id: '2', nombre: 'Laura Rosado', text: 'Hola Laura. … 2 fotos POD rechazadas (borrosas).' }, { id: '3', nombre: 'Hugo Villa', text: 'Hola Hugo. … entrega en vecino sin llamada previa.' }] },
         { id: 'w1', agent: 'marilyn', kind: 'libre', at: ago(8), nombre: 'Jorge Ruiz', fechas: ['19/11/2026'], what: 'Jorge Ruiz pide librar el 19/11', detail: 'Motivo: cita en el banco. Centro por confirmar.', priority: 'media', decision: 'pendiente' },
         { id: 'w2', agent: 'marilyn', kind: 'libre', at: ago(20), nombre: 'Sara Gil', fechas: ['21/11/2026', '22/11/2026'], station: 'VAD4', rrhhName: 'SARA GIL MORENO', what: 'Sara Gil Moreno pide librar el 21/11 y 22/11', detail: 'Motivo: boda familiar. Centro: VAD4.', priority: 'media', decision: 'pendiente' },
-        { id: 'e1', agent: 'olga', at: ago(12), what: 'Enviar el Análisis DSP WK45 a Amazon', to: 'Amazon', detail: 'DCR, DSC DPMO y POD con causa raíz y plan de acción. Solo Transporter IDs.', priority: 'alta', decision: 'pendiente' },
+        { id: 'e1', agent: 'ana', at: ago(12), what: 'Enviar el Análisis DSP WK45 a Amazon', to: 'Amazon', detail: 'DCR, DSC DPMO y POD con causa raíz y plan de acción. Solo Transporter IDs.', priority: 'alta', decision: 'pendiente' },
         { id: 'e2', agent: 'lucia', at: ago(40), what: 'Responder a Angel sobre asistencia VAD7', to: 'Angel Martín', detail: 'Borrador listo en Outlook.', priority: 'media', decision: 'pendiente' },
         { id: 'e3', agent: 'dani', at: ago(120), what: 'Carpeta MIGRAR 09/11 · 12 diplomas', to: 'Amazon', priority: 'baja', decision: 'aprobado', decidedAt: ago(110) }
       ],
@@ -61,8 +62,8 @@
       ],
       log: [
         { id: 'l0', agent: 'marilyn', at: ago(8), text: 'leyó 9 chats: 2 peticiones de día libre, 1 aviso de retraso', state: 'pendiente' },
-        { id: 'l1', agent: 'lucia', at: ago(4), text: 'repartió 23 emails: 4 a Olga, 6 a Marta, 3 a Dani', state: 'ok' },
-        { id: 'l2', agent: 'olga', at: ago(12), text: 'dejó el análisis WK45 para aprobar', state: 'pendiente' },
+        { id: 'l1', agent: 'lucia', at: ago(4), text: 'repartió 23 emails: 4 a Ana, 6 a Marta, 3 a Dani', state: 'ok' },
+        { id: 'l2', agent: 'ana', at: ago(12), text: 'dejó el análisis WK45 para aprobar', state: 'pendiente' },
         { id: 'l3', agent: 'dani', at: ago(30), text: 'avisó: 3 conductores sin diploma desde hace 7 días', state: 'error' },
         { id: 'l4', agent: 'cristian', at: ago(110), text: 'aprobó MIGRAR 09/11', state: 'ok' },
         { id: 'l5', agent: 'dani', at: ago(120), text: 'renombró 12 diplomas y preparó MIGRAR 09/11', state: 'ok' },
@@ -192,6 +193,7 @@
     const det = (x.detail || '') + (x.to ? (x.detail ? ' ' : '') + 'Para: ' + x.to + '.' : '');
     const ok = x.decision === 'aprobado';
     if (x.kind === 'libre') return cardLibre(x, pending);
+    if (x.kind === 'lote') return cardLote(x, pending);
     const foot = pending
       ? `<div class="acts"><button class="btn back" data-dec="devuelto" data-id="${esc(x.id)}">Devolver</button><button class="btn approve" data-dec="aprobado" data-id="${esc(x.id)}">Aprobar</button></div>`
       : `<span class="stamp ${ok ? 'ok' : 'no'}"><svg viewBox="0 0 24 24" aria-hidden="true">${ok ? '<path d="m5 12 4 4 10-10"/>' : '<path d="M6 6l12 12M18 6 6 18"/>'}</svg>${ok ? 'Aprobado' : 'Devuelto'} · ${esc(hm(x.decidedAt))}</span>`;
@@ -206,6 +208,32 @@
       : `<span class="stamp ${ok ? 'ok' : 'no'}"><svg viewBox="0 0 24 24" aria-hidden="true">${ok ? '<path d="m5 12 4 4 10-10"/>' : '<path d="M6 6l12 12M18 6 6 18"/>'}</svg>${ok ? 'Aceptado' + (x.station ? ' · fucsia en ' + esc(x.station) : '') : 'Denegado'} · ${esc(hm(x.decidedAt))}</span>`;
     const msg = !pending && x.mensaje ? `<div class="det">${(S.outbox || []).some((o) => o.approvalId === x.id && o.sent) ? 'Mensaje enviado' : 'Marilyn enviará'}: «${esc(x.mensaje)}»</div>` : '';
     return `<article class="card libre${fresh('ap' + x.id + (pending ? 'p' : 'd'))}" id="card-${esc(x.id)}"><div class="head"><img src="${AV(x.agent)}" alt=""><span class="who"><b>${esc(name(x.agent))} · día libre</b><small>${esc(rel(x.at))}</small></span>${st}</div><div class="what">${esc(x.what)}</div>${x.detail ? `<div class="det">${esc(x.detail)}</div>` : ''}${msg}${foot}</article>`;
+  }
+
+  function cardLote(x, pending) {
+    const ms = x.mensajes || [], ok = x.decision === 'aprobado';
+    const st = x.station ? `<span class="pill centro">${esc(x.station)}</span>` : '';
+    const link = x.link ? ` <a href="${esc(x.link)}" target="_blank" rel="noopener">Abrir</a>` : '';
+    const list = pending ? `<details class="lote"><summary>Ver los ${ms.length} mensajes · quita los que no quieras enviar</summary>${ms.map((m) => `<label class="msg"><input type="checkbox" checked data-lote="${esc(x.id)}" value="${esc(m.id)}"><span><b>${esc(m.nombre || m.tid)}</b><span class="tx">${esc(m.text)}</span></span></label>`).join('')}</details>` : '';
+    const foot = pending
+      ? `<div class="acts"><button class="btn back" data-dec="devuelto" data-id="${esc(x.id)}">Devolver</button><button class="btn approve" data-lotego="${esc(x.id)}">Aprobar y enviar</button></div>`
+      : `<span class="stamp ${ok ? 'ok' : 'no'}"><svg viewBox="0 0 24 24" aria-hidden="true">${ok ? '<path d="m5 12 4 4 10-10"/>' : '<path d="M6 6l12 12M18 6 6 18"/>'}</svg>${ok ? 'Aprobado · ' + (x.enviados ?? ms.length) + ' a Marilyn' : 'Devuelto'} · ${esc(hm(x.decidedAt))}</span>`;
+    return `<article class="card lote${fresh('ap' + x.id + (pending ? 'p' : 'd'))}" id="card-${esc(x.id)}"><div class="head"><img src="${AV(x.agent)}" alt=""><span class="who"><b>${esc(name(x.agent))} · mensajes a conductores</b><small>${esc(rel(x.at))}</small></span>${st}</div><div class="what">${esc(x.what)}</div>${x.detail || link ? `<div class="det">${esc(x.detail || '')}${link}</div>` : ''}${list}${foot}</article>`;
+  }
+  async function decideLote(id) {
+    const x = (S.approvals || []).find((a) => a.id === id); if (!x) return;
+    const quitar = [...document.querySelectorAll(`input[data-lote="${CSS.escape(id)}"]`)].filter((i) => !i.checked).map((i) => i.value);
+    const n = (x.mensajes || []).length - quitar.length;
+    if (!n) { toast('Has quitado todos los mensajes. Usa «Devolver».'); return; }
+    const cardEl = $('card-' + id); cardEl && cardEl.querySelectorAll('button').forEach((b) => (b.disabled = true));
+    try {
+      if (cfg.demo) { x.decision = 'aprobado'; x.decidedAt = new Date().toISOString(); x.enviados = n; }
+      else { const j = await post({ action: 'decidir', id, decision: 'aprobado', quitar }); if (j) { S = j; store.set('cache', j); } }
+    } catch (e) { render(); toast('No se pudo guardar. Revisa la conexión e inténtalo otra vez.'); return; }
+    cardEl && cardEl.classList.add('leaving');
+    office.decision(x.agent, true);
+    toast(n + (n === 1 ? ' mensaje pasa' : ' mensajes pasan') + ' a Marilyn. Los enviará en sus próximas rondas.');
+    setTimeout(render, RM ? 0 : 900);
   }
 
   function renderLog(open) {
@@ -346,10 +374,11 @@
   }
   window.addEventListener('popstate', () => go((location.hash || '#oficina').slice(1), false));
   document.addEventListener('click', (e) => {
-    const t = e.target.closest('[data-go],[data-agent],[data-dec],[data-libre],[data-resolve],[data-filter]');
+    const t = e.target.closest('[data-go],[data-agent],[data-dec],[data-libre],[data-lotego],[data-resolve],[data-filter]');
     if (!t) return;
     if (t.dataset.go) go(t.dataset.go);
     else if (t.dataset.agent) openAgent(t.dataset.agent);
+    else if (t.dataset.lotego) decideLote(t.dataset.lotego);
     else if (t.dataset.libre) decideLibre(t.dataset.id, t.dataset.libre);
     else if (t.dataset.dec) decide(t.dataset.id, t.dataset.dec, t);
     else if (t.dataset.resolve) resolve(t.dataset.resolve, t);
@@ -465,7 +494,7 @@
   const CYCLE = ['libre', 'trabajando', 'trabajando', 'esperando', 'libre', 'alerta', 'trabajando'];
   setInterval(() => {
     if (!cfg.demo || document.hidden) return;
-    const ids = ['lucia', 'olga', 'marta', 'dani'], id = ids[Math.floor(Math.random() * ids.length)];
+    const ids = ['lucia', 'ana', 'marta', 'dani'], id = ids[Math.floor(Math.random() * ids.length)];
     const a = S.agents[id], next = JSON.parse(JSON.stringify(S));
     const st = CYCLE[(CYCLE.indexOf(a.status) + 1) % CYCLE.length];
     next.agents[id] = { ...a, status: st, task: st === 'trabajando' ? a.next || a.task || 'Trabajando' : st === 'libre' ? '' : a.task, lastAt: new Date().toISOString() };

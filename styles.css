@@ -287,3 +287,12 @@ h1, h2, h3 { font-family: var(--f-display); font-weight: 600; margin: 0; text-wr
 .cands { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
 .cand { border: 1.5px solid var(--line); background: #F7F9FC; border-radius: 999px; padding: 8px 12px; font-size: 13px; font-weight: 600; }
 .pick .acts { display: flex; gap: 8px; margin-top: 18px; }
+
+/* lotes de mensajes (Ana → Marilyn) */
+.card.lote { border-left: 4px solid #8B5CF6; }
+details.lote { margin: 8px 0 12px; border: 1.5px solid var(--line); border-radius: 14px; background: #FAFBFD; }
+details.lote summary { padding: 12px 14px; font-weight: 600; font-size: 14px; cursor: pointer; }
+details.lote .msg { display: flex; gap: 10px; padding: 10px 14px; border-top: 1px solid var(--line); font-size: 13px; align-items: flex-start; }
+details.lote .msg input { width: 20px; height: 20px; margin-top: 2px; accent-color: #25D366; flex: none; }
+details.lote .msg .tx { display: block; color: var(--muted); white-space: pre-wrap; margin-top: 2px; }
+details.lote .msg:has(input:not(:checked)) { opacity: .45; }
