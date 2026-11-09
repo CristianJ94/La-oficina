@@ -1,0 +1,21 @@
+{
+  "name": "La Oficina · Instapack",
+  "short_name": "La Oficina",
+  "description": "Tus agentes de Instapack trabajando en directo",
+  "lang": "es",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#FFFFFF",
+  "theme_color": "#FFFFFF",
+  "icons": [
+    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png" },
+    { "src": "icons/maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ],
+  "shortcuts": [
+    { "name": "Aprobaciones", "url": "./#aprobar", "icons": [{ "src": "icons/icon-192.png", "sizes": "192x192" }] },
+    { "name": "Registro", "url": "./#registro", "icons": [{ "src": "icons/icon-192.png", "sizes": "192x192" }] }
+  ]
+}

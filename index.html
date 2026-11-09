@@ -1,0 +1,123 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>La Oficina</title>
+<meta name="description" content="Tus agentes de Instapack trabajando en directo">
+<meta name="theme-color" content="#FFFFFF">
+<meta name="color-scheme" content="light">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="La Oficina">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icons/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600&family=Inter:wght@400;500;600;700&display=swap">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<div class="app">
+
+  <!-- OFICINA -->
+  <main class="view" id="v-oficina" data-view="oficina" aria-labelledby="t-oficina">
+    <header class="top">
+      <div class="top-text">
+        <span class="date" id="fecha"></span>
+        <h1 id="t-oficina"><span id="saludo">Hola</span>, Cristian</h1>
+      </div>
+      <button class="me" id="go-ajustes" type="button" aria-label="Ajustes"><img src="icons/av_cristian.svg" alt="" width="44" height="44"></button>
+    </header>
+    <p class="banner" id="demo-banner" hidden>Estás viendo <b>datos de ejemplo</b>. <button type="button" class="linklike" data-go="ajustes">Conectar mi oficina</button></p>
+    <div class="chips" id="chips"></div>
+    <section class="stage-wrap" aria-label="La oficina">
+      <div class="stage" id="stage"><div class="stage-inner" id="stage-inner"></div></div>
+      <div class="zoom" role="group" aria-label="Zoom">
+        <button type="button" id="z-in" aria-label="Acercar"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></button>
+        <button type="button" id="z-out" aria-label="Alejar"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14"/></svg></button>
+      </div>
+      <span class="hint" id="hint">Toca a un agente · pellizca para acercar</span>
+    </section>
+    <section class="block">
+      <h2>Ahora mismo</h2>
+      <div class="people" id="people"></div>
+      <p class="vacantes" id="vacantes" hidden></p>
+    </section>
+  </main>
+
+  <!-- APROBAR -->
+  <main class="view" id="v-aprobar" data-view="aprobar" hidden aria-labelledby="t-aprobar">
+    <header class="top"><h1 id="t-aprobar">Aprobaciones</h1><span class="meta" id="apr-meta"></span></header>
+    <p class="lead">Nada sale de la oficina sin tu sí. Revisa, aprueba o devuélvelo al agente.</p>
+    <div class="cards" id="apr-list"></div>
+    <h2 class="sub" id="apr-done-t" hidden>Hechas hoy</h2>
+    <div class="cards" id="apr-done"></div>
+  </main>
+
+  <!-- REGISTRO -->
+  <main class="view" id="v-registro" data-view="registro" hidden aria-labelledby="t-registro">
+    <header class="top"><h1 id="t-registro">Registro</h1></header>
+    <div class="alerts" id="alerts"></div>
+    <div class="filters" id="filters" role="group" aria-label="Filtrar por agente"></div>
+    <div id="log"></div>
+  </main>
+
+  <!-- AJUSTES -->
+  <main class="view" id="v-ajustes" data-view="ajustes" hidden aria-labelledby="t-ajustes">
+    <header class="top"><h1 id="t-ajustes">Ajustes</h1></header>
+
+    <section class="panel" id="install-panel">
+      <div class="appid"><img src="icons/icon-192.png" alt="" width="64" height="64"><div><b>La Oficina</b><span>Instapack · tus agentes en directo</span></div></div>
+      <div id="install-body"></div>
+    </section>
+
+    <section class="panel">
+      <h2>Avisos</h2>
+      <label class="switch"><span><b>Avisarme</b><small>Cuando un agente te pida aprobación o salte una alerta grave, mientras la app esté abierta o en segundo plano.</small></span><input type="checkbox" id="avisos"></label>
+    </section>
+
+    <section class="panel">
+      <h2>Conexión con tu oficina</h2>
+      <form id="conn" autocomplete="off">
+        <label class="field"><span>Dirección del Apps Script</span><input id="f-url" type="url" inputmode="url" placeholder="https://script.google.com/macros/s/…/exec" required></label>
+        <label class="field"><span>Clave</span><input id="f-clave" type="password" required></label>
+        <div class="row"><button class="btn primary" type="submit">Guardar y conectar</button><span class="conn-state" id="conn-state" role="status"></span></div>
+      </form>
+      <label class="switch"><span><b>Datos de ejemplo</b><small>Para enseñar la app sin tocar tu oficina real.</small></span><input type="checkbox" id="demo"></label>
+    </section>
+    <p class="foot">La Oficina · v1.0</p>
+  </main>
+</div>
+
+<nav class="tabbar" aria-label="Secciones">
+  <button type="button" data-go="oficina" aria-current="page"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 10.5 12 4l9 6.5"/><path d="M5 9.5V20h14V9.5"/><path d="M10 20v-5h4v5"/></svg><span>Oficina</span></button>
+  <button type="button" data-go="aprobar"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="m8 12 3 3 5-6"/></svg><span>Aprobar</span><b class="badge" id="badge" hidden>0</b></button>
+  <button type="button" data-go="registro"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 6h12M8 12h12M8 18h12"/><circle cx="4" cy="6" r="1"/><circle cx="4" cy="12" r="1"/><circle cx="4" cy="18" r="1"/></svg><span>Registro</span><b class="badge red" id="badge-al" hidden>0</b></button>
+  <button type="button" data-go="ajustes"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M4.9 19.1 7 17M17 7l2.1-2.1"/></svg><span>Ajustes</span></button>
+</nav>
+
+<dialog class="sheet" id="sheet" aria-labelledby="s-name">
+  <div class="grab" aria-hidden="true"></div>
+  <button class="close" type="button" id="s-close" aria-label="Cerrar"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg></button>
+  <div class="s-head">
+    <div class="s-av"><img id="s-av" alt="" width="104" height="104"><span class="s-bub" id="s-bub" hidden></span></div>
+    <h2 id="s-name"></h2>
+    <span class="s-role" id="s-role"></span>
+    <span class="pill" id="s-pill"></span>
+  </div>
+  <div class="s-now" id="s-now"></div>
+  <p class="s-week" id="s-week"></p>
+  <h3>Últimas acciones</h3>
+  <div class="timeline" id="s-log"></div>
+  <dl class="s-kv" id="s-kv"></dl>
+</dialog>
+
+<div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
+
+<script src="office.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
