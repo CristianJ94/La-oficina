@@ -215,7 +215,7 @@ h1, h2, h3 { font-family: var(--f-display); font-weight: 600; margin: 0; text-wr
 .foot { text-align: center; color: var(--muted); font-size: 12px; margin: 0; }
 
 /* ---------- navegación ---------- */
-.tabbar { position: fixed; left: 0; right: 0; bottom: 0; z-index: var(--z-nav); display: grid; grid-template-columns: repeat(4, minmax(0, 1fr));
+.tabbar { position: fixed; left: 0; right: 0; bottom: 0; z-index: var(--z-nav); display: grid; grid-template-columns: repeat(5, minmax(0, 1fr));
   padding: 6px max(8px, env(safe-area-inset-left)) calc(6px + env(safe-area-inset-bottom)) max(8px, env(safe-area-inset-right));
   background: rgba(255,255,255,.96); border-top: 1px solid var(--line-soft); }
 .tabbar button { position: relative; display: flex; flex-direction: column; align-items: center; gap: 3px; min-height: 52px; padding: 6px 0; border: 0; background: none; color: var(--muted); font-size: 11px; font-weight: 500; max-width: 140px; justify-self: center; width: 100%; }
@@ -296,3 +296,53 @@ details.lote .msg { display: flex; gap: 10px; padding: 10px 14px; border-top: 1p
 details.lote .msg input { width: 20px; height: 20px; margin-top: 2px; accent-color: #25D366; flex: none; }
 details.lote .msg .tx { display: block; color: var(--muted); white-space: pre-wrap; margin-top: 2px; }
 details.lote .msg:has(input:not(:checked)) { opacity: .45; }
+
+/* ---------- informes de ronda ---------- */
+.hoy { display: flex; flex-direction: column; gap: 10px; padding: 14px; border-radius: 18px; background: var(--surface); }
+.hoy h2 { font-size: 15px; }
+.hoy .row { display: grid; grid-template-columns: 30px 64px 1fr; align-items: center; gap: 8px; font-size: 12px; }
+.hoy .row img { width: 30px; height: 30px; border-radius: 50%; }
+.hoy .row b { font-size: 13px; display: block; } .hoy .row small { color: var(--muted); }
+.track { position: relative; height: 22px; border-radius: 8px; background: #fff; border: 1px solid var(--line); }
+.track span { position: absolute; top: 3px; bottom: 3px; min-width: 6px; border-radius: 5px; background: var(--ok); }
+.track span.alerta { background: var(--bad); } .track span.esperando { background: var(--warn); } .track span.vacia { background: #B8C0CC; }
+.track span.curso { background: repeating-linear-gradient(45deg, var(--ok) 0 4px, #7FD9A8 4px 8px); }
+.hours { display: flex; justify-content: space-between; margin-left: 102px; font-size: 10px; color: var(--muted); font-variant-numeric: tabular-nums; }
+.legend { display: flex; flex-wrap: wrap; gap: 10px; font-size: 11px; color: var(--ink-2); }
+.legend i { display: inline-block; width: 10px; height: 10px; border-radius: 3px; margin-right: 4px; vertical-align: -1px; background: var(--ok); }
+.legend i.alerta { background: var(--bad); } .legend i.esperando { background: var(--warn); } .legend i.vacia { background: #B8C0CC; }
+
+.ronda .when { font-size: 12px; color: var(--muted); font-variant-numeric: tabular-nums; }
+.ronda .res { font-size: 15px; font-weight: 600; line-height: 1.35; }
+.tiles { display: grid; grid-template-columns: repeat(auto-fill, minmax(96px, 1fr)); gap: 8px; }
+.tile { border-radius: 14px; background: var(--surface); padding: 10px 12px; display: flex; flex-direction: column; gap: 2px; }
+.tile b { font-family: var(--f-display); font-size: 24px; line-height: 1; font-variant-numeric: tabular-nums; }
+.tile span { font-size: 11px; color: var(--ink-2); line-height: 1.25; }
+.tile.bad { background: var(--bad-bg); } .tile.bad b { color: var(--bad-ink); }
+.tile.ok b { color: var(--ok-ink); }
+.grp { border-top: 1px solid var(--line-soft); padding-top: 8px; }
+.grp > summary { list-style: none; cursor: pointer; display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 700; min-height: 32px; }
+.grp > summary::-webkit-details-marker { display: none; }
+.grp > summary .n { margin-left: auto; font-size: 12px; color: var(--muted); font-weight: 600; }
+.grp > summary::after { content: ''; width: 8px; height: 8px; border-right: 2px solid var(--muted); border-bottom: 2px solid var(--muted); transform: rotate(45deg); margin: -4px 2px 0 4px; transition: transform .2s; }
+.grp[open] > summary::after { transform: rotate(-135deg); margin-top: 4px; }
+.dot { width: 10px; height: 10px; border-radius: 50%; flex: none; background: #9AA4B2; }
+.dot.enviado { background: #25D366; } .dot.fallido, .dot.alerta { background: var(--bad); } .dot.peticion { background: #ff00ff; }
+.dot.lote, .dot.aprobacion { background: var(--warn); } .dot.ausencia { background: #3B82F6; } .dot.borrador { background: #8B5CF6; }
+.dot.procesada, .dot.contacto { background: var(--ok); }
+.items { list-style: none; margin: 4px 0 0; padding: 0; display: flex; flex-direction: column; }
+.items li { display: grid; grid-template-columns: 1fr auto; gap: 2px 8px; padding: 7px 0; border-bottom: 1px dashed var(--line-soft); font-size: 13px; }
+.items li:last-child { border-bottom: 0; }
+.items .t { font-weight: 600; min-width: 0; overflow-wrap: anywhere; }
+.items time { font-size: 11px; color: var(--muted); font-variant-numeric: tabular-nums; }
+.items .o { grid-column: 1 / -1; font-size: 12px; color: var(--ink-2); }
+.items .bad { color: var(--bad-ink); } .items .okc { color: var(--ok-ink); }
+.items details { grid-column: 1 / -1; }
+.items details summary { font-size: 12px; color: var(--accent-ink); font-weight: 600; cursor: pointer; }
+.items details p { margin: 6px 0 0; padding: 10px 12px; border-radius: 12px; background: #E9FBEF; font-size: 13px; white-space: pre-wrap; }
+.tagc { display: inline-block; margin-left: 6px; padding: 1px 6px; border-radius: 6px; background: var(--idle-bg); font-size: 11px; font-weight: 700; color: var(--idle-ink); vertical-align: 1px; }
+.mas { font-size: 12px; color: var(--muted); }
+.niv { display: inline-block; padding: 1px 6px; border-radius: 6px; font-size: 11px; font-weight: 700; margin-right: 2px; vertical-align: 1px; }
+.niv.n1 { background: var(--bad-bg); color: var(--bad-ink); } .niv.n2 { background: #FFE6D5; color: var(--accent-ink); }
+.niv.n3 { background: var(--warn-bg); color: var(--warn-ink); } .niv.n4 { background: var(--idle-bg); color: var(--idle-ink); }
+.dot.email { background: #0F6CBD; } .dot.nota { background: #9AA4B2; }

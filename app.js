@@ -44,7 +44,7 @@
         ana: { name: 'Ana', role: 'Métricas y scorecard', status: 'esperando', task: 'Análisis DSP WK45 listo para enviar', lastAction: 'Dejó el análisis para aprobar', lastAt: ago(12), next: 'Mensajes DA de la semana', schedule: 'Cuando le pases el scorecard', autonomy: 'Prepara; nunca envía', doneWeek: 4 },
         marta: { name: 'Marta', role: 'Selección y entrevistas', status: 'libre', task: '', lastAction: 'Cargó 18 candidatos de la WK46', lastAt: ago(95), next: 'Entrevistas DMZ4 del jueves', schedule: 'A demanda (WK##)', autonomy: 'Prepara; no descarta a nadie', doneWeek: 2 },
         dani: { name: 'Dani', role: 'Onboarding', status: 'alerta', task: 'Revisando diplomas pendientes', lastAction: 'Preparó MIGRAR 09/11', lastAt: ago(30), next: 'Carpetas INCORPORACIONES', schedule: 'L–V 9:10', autonomy: 'Renombra y mueve; no borra ni envía', doneWeek: 5 },
-        marilyn: { name: 'Marilyn', role: 'WhatsApp de empresa', status: 'esperando', task: '', lastAction: 'Leyó 9 chats nuevos', lastAt: ago(8), next: 'Próxima ronda a las 12:02', schedule: 'L–V cada hora, de 9:02 a 18:02', autonomy: 'Lee y avisa; solo envía lo que tú apruebas', doneWeek: 6 },
+        marilyn: { name: 'Marilyn', role: 'WhatsApp de empresa', status: 'esperando', task: '', lastAction: 'Leyó 9 chats nuevos', lastAt: ago(8), next: 'Próxima ronda a las 12:02', schedule: 'L–V cada 2 horas, de 9:02 a 17:02', autonomy: 'Lee y avisa; solo envía lo que tú apruebas', doneWeek: 6 },
         inspector: { name: 'El Inspector', role: 'Auditoría y alertas', status: 'fuera' },
         gabinete: { name: 'Jefa de gabinete', role: 'Parte diario', status: 'fuera' }
       },
@@ -59,6 +59,30 @@
       alerts: [
         { id: 'a1', agent: 'dani', at: ago(30), level: 'rojo', station: 'DMZ4', text: '3 conductores llevan más de 7 días sin diploma', action: 'Revisar su módulo en Amiigo', state: 'abierta' },
         { id: 'a2', agent: 'lucia', at: ago(150), level: 'amarillo', station: 'Outlook', text: '2 emails de Amazon sin responder desde hace 48 h', action: 'Revisar los borradores', state: 'abierta' }
+      ],
+      rondas: [
+        { id: 'r1', agent: 'marilyn', inicio: ago(14), fin: ago(8), status: 'esperando', resumen: 'Enviados 4 mensajes y leídos 9 chats: 2 peticiones de día libre', cifras: { 'Enviados': 4, 'Chats leídos': 9, 'Peticiones': 2, 'Fallidos': 1 }, items: [
+          { k: 'enviado', at: ago(13), para: 'Jorge Alonso', station: 'VAD7', origen: 'Daily metrics VAD7 · 3 conductores', text: 'Hola Jorge. Soy Cristian, compañero de Álvaro y Antonio… Ayer tuviste 1 paquete que el cliente dice no haber recibido: ES2644343859 · Hogar · 31 m ⚠️ · SIN contacto.' },
+          { k: 'enviado', at: ago(13), para: 'Laura Rosado', station: 'VAD7', origen: 'Daily metrics VAD7 · 3 conductores', text: 'Hola Laura. … 2 fotos POD rechazadas (borrosas).' },
+          { k: 'enviado', at: ago(12), para: 'Pedro Sanz', station: 'VAD4', origen: 'Día libre aceptado', text: 'Hola Pedro, se ha aceptado tu petición de día libre para el 14/11. ¡Un saludo!' },
+          { k: 'enviado', at: ago(12), para: 'Ana López', station: 'DMZ4', origen: 'Día libre denegado', text: 'Hola Ana, se ha denegado tu solicitud de día libre para el 15/11 por motivos de volumen. Un saludo.' },
+          { k: 'fallido', at: ago(11), para: 'Hugo Villa', station: 'VAD7', text: 'Hay dos chats con ese nombre' },
+          { k: 'contacto', at: ago(11), text: 'Laura Rosado' },
+          { k: 'peticion', at: ago(9), text: 'Jorge Ruiz pide librar el 19/11' },
+          { k: 'peticion', at: ago(9), text: 'Sara Gil Moreno pide librar el 21/11 y 22/11', station: 'VAD4' }] },
+        { id: 'r2', agent: 'ana', inicio: ago(40), fin: ago(15), status: 'esperando', resumen: 'Daily del 8 y 9/11: 3 lotes con los conductores más críticos', cifras: { 'Con fallos': 31, 'Críticos': 9, 'Mensajes': 9 }, items: [
+          { k: 'lote', at: ago(16), text: 'Daily metrics VAD7 · 3 conductores', station: 'VAD7', n: 3, para: ['Jorge Alonso', 'Laura Rosado', 'Hugo Villa'] },
+          { k: 'lote', at: ago(16), text: 'Daily metrics VAD4 · 4 conductores', station: 'VAD4', n: 4, para: ['Pedro Sanz', 'Raúl Díaz', 'Iván Mora', 'Eva Ríos'] },
+          { k: 'registro', at: ago(30), text: 'descargó 6 Daily Report de Amazon Logistics', state: 'ok' }] },
+        { id: 'r3', agent: 'lucia', inicio: ago(6), status: 'trabajando', task: 'Revisando Outlook', items: [{ k: 'ausencia', ok: true, at: ago(5), station: 'VAD7', text: 'A a JORGE RUIZ PEREZ el 10/11 en RRHH VAD7' }, { k: 'ausencia', ok: false, at: ago(5), station: 'VAD4', text: '«Fulano Raro» del 10/11: no aparece en ningún RRHH' }] },
+        { id: 'r4', agent: 'lucia', inicio: ago(125), fin: ago(118), status: 'alerta', resumen: 'Revisados 23 emails: 1 crítico, 4 altos', cifras: { 'Emails': 23, 'Críticos': 1, 'Altos': 4, 'Borradores': 2 }, items: [
+          { k: 'alerta', level: 'rojo', at: ago(120), station: 'DMZ4', text: 'Amazon pide respuesta hoy sobre DCR de DMZ4' },
+          { k: 'email', nivel: 1, at: ago(118), station: 'DMZ4', text: 'Amazon · DCR semana 45, respuesta hoy', quien: 'Ana' },
+          { k: 'email', nivel: 2, at: ago(118), station: 'VAD7', text: 'Angel Martín · Asistencia VAD7 de la semana', quien: 'Cristian' },
+          { k: 'email', nivel: 4, at: ago(118), station: 'General', text: 'no-reply · Daily Report DMZ4' },
+          { k: 'aprobacion', at: ago(119), text: 'Responder a Angel sobre asistencia VAD7' },
+          { k: 'borrador', at: ago(119), text: 'Respuesta al scorecard VAD4 WK45', station: 'VAD4' }] },
+        { id: 'r5', agent: 'marilyn', inicio: ago(135), fin: ago(133), status: 'libre', resumen: 'Sin novedades', cifras: { 'Enviados': 0, 'Chats leídos': 0 }, items: [] }
       ],
       log: [
         { id: 'l0', agent: 'marilyn', at: ago(8), text: 'leyó 9 chats: 2 peticiones de día libre, 1 aviso de retraso', state: 'pendiente' },
@@ -77,7 +101,7 @@
   const cfg = { url: store.get('url', ''), clave: store.get('clave', ''), demo: store.get('demo', true), avisos: store.get('avisos', false) };
   let S = store.get('cache', null);
   if (cfg.demo || !S) S = cfg.demo ? demoState() : { agents: {}, approvals: [], alerts: [], log: [] };
-  let filter = 'todos', view = 'oficina';
+  let filter = 'todos', view = 'oficina', infFilter = store.get('infFilter', 'todos');
   const seen = new Set(), counts = {};
   let ready = false; setTimeout(() => { ready = true; }, 1200);
   const notified = new Set(store.get('notified', []));
@@ -176,6 +200,7 @@
 
     renderApprovals(pend);
     renderLog(open);
+    renderInformes();
     if ($('sheet').open && $('sheet').dataset.id) fillAgent($('sheet').dataset.id);
   }
 
@@ -251,6 +276,77 @@
     $('log').innerHTML = html || `<div class="empty"><b>Sin movimiento todavía</b>Aquí verás cada paso de tus agentes, con su hora.</div>`;
   }
 
+  // ---------- informes ----------
+  const KINDS = [
+    ['enviado', 'Mensajes enviados'], ['fallido', 'No se pudieron enviar'], ['peticion', 'Peticiones de día libre'], ['lote', 'Lotes de mensajes preparados'],
+    ['aprobacion', 'Te ha dejado para aprobar'], ['alerta', 'Alertas'], ['ausencia', 'Ausencias en el RRHH'], ['borrador', 'Borradores en Outlook'],
+    ['email', 'Emails revisados'], ['procesada', 'Tus decisiones aplicadas'], ['contacto', 'Directorio completado'], ['regla', 'Reglas nuevas'], ['nota', 'Más detalles'], ['registro', 'Pasos']
+  ];
+  const CIFRA = { enviado: 'Enviados', fallido: 'Fallidos', peticion: 'Peticiones', lote: 'Lotes', aprobacion: 'Para aprobar', alerta: 'Alertas', ausencia: 'Ausencias', borrador: 'Borradores' };
+  const NIVEL = { 1: 'Crítico', 2: 'Alto', 3: 'Normal', 4: 'Info' };
+  const estadoRonda = (r) => !r.fin ? 'curso' : r.cortada ? 'vacia' : (r.items || []).some((i) => i.k === 'alerta' && i.level === 'rojo') || r.status === 'alerta' ? 'alerta'
+    : r.status === 'esperando' ? 'esperando' : !(r.items || []).length && !Object.values(r.cifras || {}).some(Boolean) ? 'vacia' : 'ok';
+  const PILL_R = { curso: ['trabajando', 'En curso'], alerta: ['alerta', 'Con alerta'], esperando: ['esperando', 'Te espera'], vacia: ['libre', 'Sin novedades'], ok: ['trabajando', 'Hecho'] };
+  const dur = (a, b) => { const m = Math.round((d(b) - d(a)) / 60000); return m < 1 ? 'menos de 1 min' : m < 60 ? m + ' min' : Math.floor(m / 60) + ' h ' + (m % 60 ? m % 60 + ' min' : ''); };
+
+  function renderInformes() {
+    const R = (S.rondas || []).filter((r) => S.agents[r.agent]);
+    const ags = ORDER.filter((id) => R.some((r) => r.agent === id));
+    if (infFilter !== 'todos' && !ags.includes(infFilter)) infFilter = 'todos';
+    $('inf-filters').innerHTML = ['todos', ...ags].map((id) => `<button aria-pressed="${infFilter === id}" data-inf="${esc(id)}">${id === 'todos' ? 'Todos' : esc(name(id))}</button>`).join('');
+    const L = R.filter((r) => infFilter === 'todos' || r.agent === infFilter).sort((a, b) => d(b.inicio) - d(a.inicio));
+    const hoy = L.filter((r) => isToday(r.inicio));
+    $('inf-meta').textContent = hoy.length ? hoy.length + (hoy.length === 1 ? ' ronda hoy' : ' rondas hoy') : '';
+    // franja de hoy
+    const H0 = 8, H1 = 19, pos = (v) => { const x = d(v); return Math.max(0, Math.min(100, ((x.getHours() + x.getMinutes() / 60) - H0) / (H1 - H0) * 100)); };
+    const filas = (infFilter === 'todos' ? ags : [infFilter]).map((id) => {
+      const rs = hoy.filter((r) => r.agent === id);
+      const env = rs.reduce((n, r) => n + (r.items || []).filter((i) => i.k === 'enviado').length, 0);
+      const sub = rs.length ? rs.length + (rs.length === 1 ? ' ronda' : ' rondas') + (env ? ' · ' + env + ' env.' : '') : 'Sin rondas';
+      const segs = rs.map((r) => { const a = pos(r.inicio), b = r.fin ? pos(r.fin) : pos(new Date().toISOString()); return `<span class="${estadoRonda(r)}" style="left:${a}%;width:${Math.max(b - a, 0.8)}%" title="${esc(hm(r.inicio))}"></span>`; }).join('');
+      return `<div class="row"><img src="${AV(id)}" alt=""><div><b>${esc(name(id))}</b><small>${esc(sub)}</small></div><div class="track" role="img" aria-label="${esc(name(id) + ': ' + sub)}">${segs}</div></div>`;
+    }).join('');
+    $('inf-hoy').hidden = !filas;
+    $('inf-hoy').innerHTML = filas ? `<h2>Hoy</h2>${filas}<div class="hours"><span>8:00</span><span>11:00</span><span>14:00</span><span>17:00</span><span>19:00</span></div>
+      <div class="legend"><span><i></i>Hecho</span><span><i class="esperando"></i>Te espera</span><span><i class="alerta"></i>Con alerta</span><span><i class="vacia"></i>Sin novedades</span></div>` : '';
+    // tarjetas
+    let lastDay = '', html = '';
+    for (const r of L.slice(0, 40)) {
+      const dl = dayLabel(r.inicio);
+      if (dl !== lastDay) { html += `<div class="day">${esc(dl)}</div>`; lastDay = dl; }
+      html += rondaCard(r);
+    }
+    $('inf-list').innerHTML = html || `<div class="empty"><b>Aún no hay informes</b>Cada vez que un agente termine una ronda, verás aquí qué ha hecho.</div>`;
+  }
+  function rondaCard(r) {
+    const its = r.items || [], er = estadoRonda(r), [pc, pt] = PILL_R[er];
+    const when = r.fin ? `${hm(r.inicio)} → ${hm(r.fin)} · ${dur(r.inicio, r.fin)}` : `Desde las ${hm(r.inicio)}`;
+    let cif = Object.entries(r.cifras || {});
+    if (!cif.length) cif = Object.keys(CIFRA).map((k) => [CIFRA[k], its.filter((i) => i.k === k).length]).filter((c) => c[1]);
+    const tiles = cif.length ? `<div class="tiles">${cif.map(([k, v]) => `<div class="tile${/^(fallid|alerta|crític|error)/i.test(k) && v ? ' bad' : /envi/i.test(k) && v ? ' ok' : ''}"><b>${esc(v)}</b><span>${esc(k)}</span></div>`).join('')}</div>` : '';
+    const grupos = KINDS.map(([k, t]) => {
+      const g = its.filter((i) => i.k === k); if (!g.length) return '';
+      const abierto = k !== 'registro' && (g.length <= 6 || k === 'enviado' || k === 'alerta');
+      return `<details class="grp"${abierto ? ' open' : ''}><summary><i class="dot ${k}"></i>${esc(t)}<span class="n">${g.length}</span></summary><ul class="items">${g.slice(0, 120).map(item).join('')}</ul>${g.length > 120 ? `<p class="mas">y ${g.length - 120} más</p>` : ''}</details>`;
+    }).join('');
+    const res = r.resumen || r.task || (r.cortada ? 'No fichó el fin de la ronda' : '');
+    return `<article class="card ronda${fresh('rd' + r.id + (r.fin ? 'f' : ''))}"><div class="head"><img src="${AV(r.agent)}" alt=""><span class="who"><b>${esc(name(r.agent))}</b><small class="when">${esc(when)}</small></span><span class="pill ${pc}">${pt}</span></div>${res ? `<div class="res">${esc(res)}</div>` : ''}${tiles}${grupos}${r.recortados ? `<p class="mas">y ${r.recortados} acciones más que no caben</p>` : ''}${r.next ? `<div class="det">Después: ${esc(r.next)}</div>` : ''}</article>`;
+  }
+  function item(i) {
+    const st = i.station ? `<span class="tagc">${esc(i.station)}</span>` : '';
+    const t = `<time>${esc(hm(i.at))}</time>`;
+    switch (i.k) {
+      case 'enviado': return `<li><span class="t">${esc(i.para)}${st}</span>${t}${i.origen ? `<span class="o">${esc(i.origen)}</span>` : ''}${i.text ? `<details><summary>Ver mensaje</summary><p>${esc(i.text)}</p></details>` : ''}</li>`;
+      case 'fallido': return `<li><span class="t bad">${esc(i.para)}${st}</span>${t}<span class="o">${esc(i.text || 'No se pudo enviar')}</span></li>`;
+      case 'lote': return `<li><span class="t">${esc(i.text)}${st}</span>${t}${(i.para || []).length ? `<span class="o">${esc(i.para.join(', '))}</span>` : ''}</li>`;
+      case 'ausencia': return `<li><span class="t ${i.ok ? 'okc' : 'bad'}">${i.ok ? '✓' : '✗'} ${esc(i.text)}</span>${t}</li>`;
+      case 'alerta': return `<li><span class="t${i.level === 'rojo' ? ' bad' : ''}">${esc(i.text)}${st}</span>${t}</li>`;
+      case 'email': return `<li><span class="t"><span class="niv n${i.nivel}">${esc(NIVEL[i.nivel] || i.nivel)}</span> ${esc(i.text)}${st}</span>${t}${i.quien ? `<span class="o">Le toca a ${esc(i.quien)}</span>` : ''}</li>`;
+      case 'registro': return `<li><span class="t${i.state === 'error' ? ' bad' : ''}" style="font-weight:500">${esc(i.text)}</span>${t}</li>`;
+      default: return `<li><span class="t">${esc(i.text)}${st}</span>${t}${i.link ? `<span class="o"><a href="${esc(i.link)}" target="_blank" rel="noopener">Abrir</a></span>` : ''}</li>`;
+    }
+  }
+
   // ---------- ficha ----------
   function openAgent(id) {
     if (!S.agents[id] || S.agents[id].status === 'fuera') { toast((S.agents[id] && S.agents[id].name || 'Este puesto') + ' aún está por cubrir'); return; }
@@ -268,6 +364,7 @@
     const myPend = (S.approvals || []).filter((x) => x.agent === id && (x.decision || 'pendiente') === 'pendiente');
     $('s-now').innerHTML = `<div><small>Ahora</small><b>${esc(a.task || 'Sin tarea en curso')}</b></div>` +
       (a.next ? `<div><small>Después</small><span>${esc(a.next)}</span></div>` : '') +
+      ((S.rondas || []).some((r) => r.agent === id) ? `<button class="btn" data-inf-go="${esc(id)}" type="button">Ver sus informes</button>` : '') +
       (myPend.length ? `<button class="btn primary" data-go="aprobar" type="button">Revisar ${myPend.length === 1 ? 'su petición' : 'sus ' + myPend.length + ' peticiones'}</button>` : '');
     $('s-week').innerHTML = `Esta semana: <b>${Number(a.doneWeek) || 0} ${Number(a.doneWeek) === 1 ? 'tarea' : 'tareas'}</b>` + (a.lastAction ? ` · última: ${esc(a.lastAction)} (${esc(rel(a.lastAt).toLowerCase())})` : '');
     const L = (S.log || []).filter((l) => l.agent === id).slice(0, 8);
@@ -364,7 +461,7 @@
 
   // ---------- navegación ----------
   function go(v, push = true) {
-    if (!['oficina', 'aprobar', 'registro', 'ajustes'].includes(v)) v = 'oficina';
+    if (!['oficina', 'aprobar', 'informes', 'registro', 'ajustes'].includes(v)) v = 'oficina';
     view = v;
     document.querySelectorAll('.view').forEach((el) => (el.hidden = el.dataset.view !== v));
     document.querySelectorAll('.tabbar button').forEach((b) => { if (b.dataset.go === v) b.setAttribute('aria-current', 'page'); else b.removeAttribute('aria-current'); });
@@ -374,7 +471,8 @@
   }
   window.addEventListener('popstate', () => go((location.hash || '#oficina').slice(1), false));
   document.addEventListener('click', (e) => {
-    const t = e.target.closest('[data-go],[data-agent],[data-dec],[data-libre],[data-lotego],[data-resolve],[data-filter]');
+    const ig = e.target.closest('[data-inf-go]'); if (ig) { infFilter = ig.dataset.infGo; store.set('infFilter', infFilter); go('informes'); renderInformes(); return; }
+    const t = e.target.closest('[data-go],[data-agent],[data-dec],[data-libre],[data-lotego],[data-resolve],[data-filter],[data-inf]');
     if (!t) return;
     if (t.dataset.go) go(t.dataset.go);
     else if (t.dataset.agent) openAgent(t.dataset.agent);
@@ -382,6 +480,7 @@
     else if (t.dataset.libre) decideLibre(t.dataset.id, t.dataset.libre);
     else if (t.dataset.dec) decide(t.dataset.id, t.dataset.dec, t);
     else if (t.dataset.resolve) resolve(t.dataset.resolve, t);
+    else if (t.dataset.inf) { infFilter = t.dataset.inf; store.set('infFilter', infFilter); renderInformes(); }
     else if (t.dataset.filter) { filter = t.dataset.filter; renderLog((S.alerts || []).filter((x) => (x.state || 'abierta') === 'abierta')); }
   });
   $('go-ajustes').onclick = () => go('ajustes');
