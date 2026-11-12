@@ -60,6 +60,13 @@
         { id: 'a1', agent: 'dani', at: ago(30), level: 'rojo', station: 'DMZ4', text: '3 conductores llevan más de 7 días sin diploma', action: 'Revisar su módulo en Amiigo', state: 'abierta' },
         { id: 'a2', agent: 'lucia', at: ago(150), level: 'amarillo', station: 'Outlook', text: '2 emails de Amazon sin responder desde hace 48 h', action: 'Revisar los borradores', state: 'abierta' }
       ],
+      frases: {
+        lucia: { trabajando: ['Tres emails de Amazon antes del café…', 'Este lo dejo en borradores, jefe.', 'Clasificando: crítico, alto, normal…'], libre: ['Bandeja al día. ¡Qué gustazo!', 'Me tomo un café y vuelvo a mirar.'], esperando: ['Tienes un borrador esperándote.', '¿Le echas un ojo a esto?'] },
+        ana: { trabajando: ['Cruzando DSC con Top Offenders…', 'Este conductor repite. Ojo.', 'Sacando el Excel de control.'], libre: ['Métricas listas. Respiro.', 'Mañana más daily.'], esperando: ['Tienes un lote para aprobar.', 'Los mensajes están listos, ¿los mando?'] },
+        marta: { trabajando: ['Revisando candidatos de la ETT.', 'Esta entrevista pinta bien.'], libre: ['Agenda de entrevistas al día.'], esperando: ['Hay un candidato para que lo veas.'] },
+        dani: { trabajando: ['Preparando las altas de mañana.', 'Diplomas renombrados.'], libre: ['Carpetas de incorporaciones en orden.'], esperando: ['Necesito tu ok para un alta.'] },
+        marilyn: { trabajando: ['Enviando los mensajes aprobados.', 'Uy, otro que quiere librar el viernes.', 'Leyendo WhatsApp…'], libre: ['WhatsApp tranquilo por ahora.', 'Ningún chat sin leer.'], esperando: ['Dos peticiones de día libre para ti.', '¿Aceptamos o denegamos?'] }
+      },
       rondas: [
         { id: 'r1', agent: 'marilyn', inicio: ago(14), fin: ago(8), status: 'esperando', resumen: 'Enviados 4 mensajes y leídos 9 chats: 2 peticiones de día libre', cifras: { 'Enviados': 4, 'Chats leídos': 9, 'Peticiones': 2, 'Fallidos': 1 }, items: [
           { k: 'enviado', at: ago(13), para: 'Jorge Alonso', station: 'VAD7', origen: 'Daily metrics VAD7 · 3 conductores', text: 'Hola Jorge. Soy Cristian, compañero de Álvaro y Antonio… Ayer tuviste 1 paquete que el cliente dice no haber recibido: ES2644343859 · Hogar · 31 m ⚠️ · SIN contacto.' },
@@ -108,6 +115,27 @@
 
   // ---------- oficina ----------
   const office = new window.Office($('stage-inner'), { onPick: (id) => openAgent(id) });
+
+  // ---------- frases de los bocadillos ----------
+  // El puente manda S.frases = { agente: { trabajando: [...], libre: [...], esperando: [...] } }.
+  // Si no las manda, o vienen mal, no sale ningún bocadillo y todo lo demás sigue igual.
+  const CLAVE_FRASE = { trabajando: 'trabajando', libre: 'libre', esperando: 'esperando', alerta: 'esperando' };
+  const ultimaFrase = {};
+  function claveFrase(id, st) {
+    const tieneAprob = (S.approvals || []).some((x) => x.agent === id && (!x.decision || x.decision === 'pendiente'));
+    return st === 'libre' && tieneAprob ? 'esperando' : CLAVE_FRASE[st] || null;
+  }
+  function frase(id, st) {
+    const k = claveFrase(id, st); if (!k) return null;
+    const F = S && S.frases && typeof S.frases === 'object' ? S.frases : null;
+    const lista = F && F[id] && Array.isArray(F[id][k]) ? F[id][k].filter((t) => typeof t === 'string' && t.trim()).map((t) => t.trim().slice(0, 90)) : [];
+    if (!lista.length) return null;
+    let t = lista[Math.floor(Math.random() * lista.length)];
+    if (lista.length > 1 && t === ultimaFrase[id]) t = lista[(lista.indexOf(t) + 1) % lista.length];
+    ultimaFrase[id] = t;
+    return t;
+  }
+  office.setPhrases && office.setPhrases(frase);
 
   // ---------- red ----------
   async function fetchState() {

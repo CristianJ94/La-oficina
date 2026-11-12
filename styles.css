@@ -108,6 +108,7 @@ h1, h2, h3 { font-family: var(--f-display); font-weight: 600; margin: 0; text-wr
 @keyframes tap { to { transform: rotate(-14deg); } }
 .bot .steam { animation: steam 1.6s ease-in-out infinite; }
 @keyframes steam { 50% { opacity: .2; transform: translateY(-2px); } }
+.bot.talking .bubble-slot { opacity: 0; transition: opacity .2s; }
 .bot .bubble { transform-box: fill-box; transform-origin: 50% 100%; animation: pop .5s var(--ease) both; }
 @keyframes pop { from { opacity: 0; transform: translateY(6px) scale(.5); } }
 .bot .b-x { animation: pop .5s var(--ease) both, nudge 1.2s ease-in-out .5s infinite; }
@@ -346,3 +347,16 @@ details.lote .msg:has(input:not(:checked)) { opacity: .45; }
 .niv.n1 { background: var(--bad-bg); color: var(--bad-ink); } .niv.n2 { background: #FFE6D5; color: var(--accent-ink); }
 .niv.n3 { background: var(--warn-bg); color: var(--warn-ink); } .niv.n4 { background: var(--idle-bg); color: var(--idle-ink); }
 .dot.email { background: #0F6CBD; } .dot.nota { background: #9AA4B2; }
+
+/* ---------- bocadillos con frases (juguete 3D) ---------- */
+.talk { pointer-events: none; }
+.talk-in { transform-box: fill-box; transform-origin: 50% 100%; animation: talkIn .42s var(--ease) both; }
+.talk.bye .talk-in { animation: talkOut .25s ease-in both; }
+.talk-face { fill: #fff; stroke: #E3E8EF; stroke-width: 1; }
+.talk-depth { fill: #C9D3E0; transform: translateY(3px); }
+.talk-tail { fill: #fff; stroke: #E3E8EF; stroke-width: 1; stroke-linejoin: round; }
+.talk { filter: drop-shadow(0 3px 4px rgba(27, 42, 74, .16)); }
+.talk-tx { font-family: Fredoka, Inter, system-ui, sans-serif; font-weight: 500; fill: #1F2430; letter-spacing: .1px; }
+@keyframes talkIn { from { opacity: 0; transform: translateY(8px) scale(.6); } 60% { transform: translateY(-2px) scale(1.04); } }
+@keyframes talkOut { to { opacity: 0; transform: translateY(4px) scale(.85); } }
+@media (prefers-reduced-motion: reduce) { .talk-in, .talk.bye .talk-in { animation: none; } }

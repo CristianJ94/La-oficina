@@ -180,7 +180,7 @@
 
   // ---------- motor ----------
   function Office(host, opts) {
-    this.host = host; this.opts = opts || {};
+    this.host = host; this.opts = opts || {}; this.phrase = null;
     this.bots = {}; this.agents = {}; this.desks = {};
     this.build();
   }
@@ -190,9 +190,9 @@
     svg.setAttribute('class', 'office-svg' + (RM ? '' : ' intro'));
     svg.setAttribute('role', 'img');
     svg.setAttribute('aria-label', 'La oficina en maqueta con tus agentes');
-    svg.innerHTML = `<defs><filter id="of-blur" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="3"/></filter><filter id="of-bigblur" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="14"/></filter><filter id="of-soft" x="-30%" y="-30%" width="160%" height="180%"><feDropShadow dx="0" dy="2" stdDeviation="2" flood-color="#1B2A4A" flood-opacity=".18"/></filter><linearGradient id="of-sky-day" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#BFE6FF"/><stop offset="1" stop-color="#E9F6FF"/></linearGradient><linearGradient id="of-sky-dusk" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FFB98A"/><stop offset="1" stop-color="#FFE3C9"/></linearGradient><linearGradient id="of-sky-night" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#2C3E73"/><stop offset="1" stop-color="#55679E"/></linearGradient></defs><g class="diorama"><g class="scene"></g><g class="world"></g></g>`;
+    svg.innerHTML = `<defs><filter id="of-blur" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="3"/></filter><filter id="of-bigblur" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="14"/></filter><filter id="of-soft" x="-30%" y="-30%" width="160%" height="180%"><feDropShadow dx="0" dy="2" stdDeviation="2" flood-color="#1B2A4A" flood-opacity=".18"/></filter><linearGradient id="of-sky-day" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#BFE6FF"/><stop offset="1" stop-color="#E9F6FF"/></linearGradient><linearGradient id="of-sky-dusk" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FFB98A"/><stop offset="1" stop-color="#FFE3C9"/></linearGradient><linearGradient id="of-sky-night" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#2C3E73"/><stop offset="1" stop-color="#55679E"/></linearGradient></defs><g class="diorama"><g class="scene"></g><g class="world"></g><g class="talk-layer" aria-hidden="true"></g></g>`;
     defs = svg.querySelector('defs');
-    this.svg = svg; this.world = svg.querySelector('.world');
+    this.svg = svg; this.world = svg.querySelector('.world'); this.talkLayer = svg.querySelector('.talk-layer');
     svg.querySelector('.scene').innerHTML = staticScene();
     const items = propItems().map(([k, h]) => this.mk(h, k, 'prop'));
     for (const id of Object.keys(DESK)) {
@@ -239,7 +239,7 @@
       const d = this.desks[id];
       d.setAttribute('class', 'desk st-' + st);
       d.style.setProperty('--led', LED[st] || LED.libre);
-      if (st === 'fuera') { if (this.bots[id]) { this.bots[id].g.remove(); delete this.bots[id]; } continue; }
+      if (st === 'fuera') { if (this.bots[id]) { this.hush(this.bots[id]); this.bots[id].g.remove(); delete this.bots[id]; } continue; }
       let b = this.bots[id];
       if (!b) {
         const s = seatOf(id);
@@ -252,7 +252,7 @@
         const changed = b.st !== null;
         b.st = st;
         b.g.style.setProperty('--ring', RING[st] || RING.libre);
-        if (changed) this.burst(b);
+        if (changed) { this.burst(b); this.hush(b); b.nextTalk = performance.now() + 2500; }
         if (st === 'trabajando' || st === 'alerta') this.go(b, seatOf(id));
         else if (st === 'esperando') this.go(b, DOOR);
         else this.go(b, pick(id));
@@ -307,7 +307,7 @@
   };
   Office.prototype.decision = function (id, ok) {
     const b = this.bots[id]; if (!b) return;
-    b.decision = { kind: ok ? 'ok' : 'no', until: performance.now() + 3500 };
+    b.decision = { kind: ok ? 'ok' : 'no', until: performance.now() + 3500 }; this.hush(b);
     this.decorate(b);
     setTimeout(() => { if (b.decision) { b.decision = null; this.decorate(b); } }, 3600);
   };
@@ -331,8 +331,85 @@
       const [a, c] = iso(b.x, b.y);
       b.g.setAttribute('transform', `translate(${a.toFixed(1)} ${(c - (sitting ? 6 : 0)).toFixed(1)})`);
       b.g._k = b.x + b.y + (sitting ? .02 : 0);
+      if (b.talk) this.placeTalk(b, a, c - (sitting ? 6 : 0), sitting);
     }
+    this.talkTick(dt);
     this.sort();
+  };
+
+  // ---------- bocadillos con frases ----------
+  // Cada personaje dice una frase cada 8-10 s, con su propio ritmo; como mucho 2 a la vez.
+  const TALK_SHOW = 4600, TALK_MAX = 2;
+  Office.prototype.setPhrases = function (fn) { this.phrase = typeof fn === 'function' ? fn : null; };
+  Office.prototype.talkTick = function (dt) {
+    if (!this.phrase || document.hidden) return;
+    const now = performance.now();
+    let visibles = 0;
+    for (const id in this.bots) { const b = this.bots[id]; if (b.talk && now >= b.talk.until) this.hush(b); else if (b.talk) visibles++; }
+    for (const id in this.bots) {
+      const b = this.bots[id];
+      if (b.nextTalk === undefined) b.nextTalk = now + 1500 + Math.random() * 8000;     // arranques escalonados
+      if (b.talk || now < b.nextTalk) continue;
+      if (visibles >= TALK_MAX || (b.decision && now < b.decision.until)) { b.nextTalk = now + 1200 + Math.random() * 1500; continue; }
+      let text = null;
+      try { text = this.phrase(id, b.st); } catch (e) { text = null; }
+      b.nextTalk = now + 8000 + Math.random() * 2000;
+      if (!text) continue;
+      this.say(b, String(text)); visibles++;
+    }
+  };
+  function wrap(text, max, lines) {
+    const words = text.replace(/\s+/g, ' ').trim().split(' '), out = [];
+    let cur = '';
+    for (const w of words) {
+      if (!cur) cur = w;
+      else if ((cur + ' ' + w).length <= max) cur += ' ' + w;
+      else { out.push(cur); cur = w; if (out.length === lines) break; }
+    }
+    if (out.length < lines && cur) out.push(cur);
+    const usado = out.join(' ').length;
+    if (usado < text.replace(/\s+/g, ' ').trim().length) out[out.length - 1] = out[out.length - 1].replace(/[\s.,;:!?…]*$/, '').slice(0, max - 1) + '…';
+    return out.map((l) => l.length > max ? l.slice(0, max - 1) + '…' : l);
+  }
+  const escT = (v) => String(v).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+  Office.prototype.say = function (b, text) {
+    const lines = wrap(text, 25, 3), FS = 15, LH = 18, PADX = 11, PADY = 8;
+    const g = document.createElementNS(NS, 'g');
+    g.setAttribute('class', 'talk');
+    const ring = getComputedStyle(b.g).getPropertyValue('--ring').trim() || '#C3CCD8';
+    g.innerHTML = `<g class="talk-in"><rect class="talk-depth"/><rect class="talk-face"/><path class="talk-tail"/><rect class="talk-dot" width="8" height="8" rx="4" fill="${ring}"/>` +
+      lines.map((l, i) => `<text class="talk-tx" x="0" y="${i * LH}" font-size="${FS}">${escT(l)}</text>`).join('') + `</g>`;
+    this.talkLayer.appendChild(g);
+    let w = 0;
+    g.querySelectorAll('text').forEach((t) => { try { w = Math.max(w, t.getComputedTextLength()); } catch (e) { w = Math.max(w, t.textContent.length * FS * .55); } });
+    if (!w) w = Math.max(...lines.map((l) => l.length)) * FS * .55;
+    const W = Math.round(w + PADX * 2 + 6), H = lines.length * LH + PADY * 2 - 4;
+    b.talk = { g, W, H, until: performance.now() + TALK_SHOW };
+    const face = g.querySelector('.talk-face'), depth = g.querySelector('.talk-depth');
+    [face, depth].forEach((r) => { r.setAttribute('width', W); r.setAttribute('height', H); r.setAttribute('rx', 12); });
+    g.querySelectorAll('text').forEach((t) => t.setAttribute('x', PADX + 10));
+    g.querySelector('.talk-dot').setAttribute('x', PADX - 2); g.querySelector('.talk-dot').setAttribute('y', PADY + 1);
+    g.querySelectorAll('text').forEach((t, i) => t.setAttribute('y', PADY + 11 + i * LH));
+    b.g.classList.add('talking');
+    const [a, c] = iso(b.x, b.y); const sitting = b.g.classList.contains('sitting');
+    this.placeTalk(b, a, c - (sitting ? 6 : 0), sitting);
+  };
+  Office.prototype.placeTalk = function (b, a, c, sitting) {
+    const t = b.talk; if (!t) return;
+    const top = c - (sitting ? 70 : 78) - t.H - 9;
+    let x = a - t.W / 2; x = Math.max(6, Math.min(VW - t.W - 6, x));
+    const tip = Math.max(14, Math.min(t.W - 14, a - x));
+    t.g.setAttribute('transform', `translate(${x.toFixed(1)} ${Math.max(4, top).toFixed(1)})`);
+    if (t.tip !== Math.round(tip)) {
+      t.tip = Math.round(tip);
+      t.g.querySelector('.talk-tail').setAttribute("d", `M${tip - 7},${t.H - 1} L${tip},${t.H + 9} L${tip + 7},${t.H - 1}`);
+    }
+  };
+  Office.prototype.hush = function (b) {
+    const t = b.talk; if (!t) return;
+    b.talk = null; b.g.classList.remove('talking');
+    if (RM) { t.g.remove(); return; }
+    t.g.classList.add('bye'); setTimeout(() => t.g.remove(), 260);
   };
   Office.prototype.sort = function () {
     const kids = Array.from(this.world.children);
