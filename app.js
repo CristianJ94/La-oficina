@@ -117,7 +117,7 @@
       const r = await fetch(cfg.url + (cfg.url.includes('?') ? '&' : '?') + 'clave=' + encodeURIComponent(cfg.clave) + '&t=' + Date.now(), { cache: 'no-store' });
       const j = await r.json();
       if (j.error) throw new Error(j.error);
-      setState(j); store.set('cache', j);
+      aceptar(j);
     } catch (e) { if (navigator.onLine === false) toast('Sin conexión. Te enseño lo último que vi.'); }
   }
   async function post(body) {
@@ -125,6 +125,35 @@
     const r = await fetch(cfg.url, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify({ clave: cfg.clave, ...body }) });
     const j = await r.json(); if (j.error) throw new Error(j.error);
     return j;
+  }
+  // Lo que Cristian ya hizo en la app (resolver un aviso, decidir algo) se mantiene encima de cualquier
+  // estado que llegue durante unos minutos: así una lectura vieja del servidor no lo «resucita».
+  let local = store.get('local', null) || { alerts: {}, approvals: {} };
+  const TTL = 5 * 60e3;
+  function overlay(st) {
+    if (!st) return st;
+    const now = Date.now();
+    for (const id in local.alerts) {
+      if (now - local.alerts[id] > TTL) { delete local.alerts[id]; continue; }
+      const a = (st.alerts || []).find((x) => x.id === id); if (a) a.state = 'resuelta';
+    }
+    for (const id in local.approvals) {
+      const o = local.approvals[id];
+      if (now - o.t > TTL) { delete local.approvals[id]; continue; }
+      const a = (st.approvals || []).find((x) => x.id === id);
+      if (a && (!a.decision || a.decision === 'pendiente')) { a.decision = o.dec; a.decidedAt = a.decidedAt || new Date(o.t).toISOString(); }
+    }
+    store.set('local', local);
+    return st;
+  }
+  const marcar = (tipo, id, v) => { local[tipo][id] = v; store.set('local', local); };
+  const desmarcar = (tipo, id) => { delete local[tipo][id]; store.set('local', local); };
+  if (!cfg.demo) overlay(S);
+  // Acepta un estado del servidor solo si no es más viejo que el que ya tenemos.
+  function aceptar(j) {
+    if (!j || j.error) return false;
+    if (S && S.updatedAt && j.updatedAt && j.updatedAt < S.updatedAt) return false;
+    setState(overlay(j)); store.set('cache', j); return true;
   }
   function setState(next) {
     const prev = S; S = next;
@@ -253,7 +282,7 @@
     const cardEl = $('card-' + id); cardEl && cardEl.querySelectorAll('button').forEach((b) => (b.disabled = true));
     try {
       if (cfg.demo) { x.decision = 'aprobado'; x.decidedAt = new Date().toISOString(); x.enviados = n; }
-      else { const j = await post({ action: 'decidir', id, decision: 'aprobado', quitar }); if (j) { S = j; store.set('cache', j); } }
+      else { const j = await post({ action: 'decidir', id, decision: 'aprobado', quitar }); marcar('approvals', id, { dec: 'aprobado', t: Date.now() }); if (j) aceptar(j); }
     } catch (e) { render(); toast('No se pudo guardar. Revisa la conexión e inténtalo otra vez.'); return; }
     cardEl && cardEl.classList.add('leaving');
     office.decision(x.agent, true);
@@ -378,7 +407,7 @@
   async function decide(id, dec, btn) {
     const x = (S.approvals || []).find((a) => a.id === id); if (!x) return;
     const cardEl = $('card-' + id); cardEl && cardEl.querySelectorAll('button').forEach((b) => (b.disabled = true));
-    const before = JSON.parse(JSON.stringify(S));
+    marcar('approvals', id, { dec, t: Date.now() });
     x.decision = dec; x.decidedAt = new Date().toISOString();
     (S.log = S.log || []).unshift({ id: 'c' + Date.now(), agent: 'cristian', at: x.decidedAt, text: (dec === 'aprobado' ? 'aprobó: ' : 'devolvió: ') + x.what, state: 'ok' });
     if (cardEl) {
@@ -389,8 +418,8 @@
     office.decision(x.agent, dec === 'aprobado');
     toast(dec === 'aprobado' ? 'Aprobado. ' + name(x.agent) + ' lo verá en su próxima tanda.' : 'Devuelto a ' + name(x.agent) + '.');
     setTimeout(render, RM ? 0 : 1150);
-    try { const j = await post({ action: 'decidir', id, decision: dec }); if (j) { S = j; store.set('cache', j); } }
-    catch (e) { S = before; render(); toast('No se pudo guardar. Revisa la conexión e inténtalo otra vez.'); }
+    try { const j = await post({ action: 'decidir', id, decision: dec }); if (j) aceptar(j); }
+    catch (e) { desmarcar('approvals', id); x.decision = 'pendiente'; render(); toast('No se pudo guardar. Revisa la conexión e inténtalo otra vez.'); }
   }
   // Días libres: espera al servidor (pinta en RRHH) y, si hace falta, pregunta centro o nombre.
   async function decideLibre(id, dec, extra) {
@@ -407,7 +436,7 @@
     } catch (e) { render(); toast('No se pudo guardar. Revisa la conexión e inténtalo otra vez.'); return; }
     if (j && j.pedir) { askCentro(x, dec, j); return; }
     if (j && j.error) { render(); toast(j.error); return; }
-    if (j && !cfg.demo) { S = j; store.set('cache', j); }
+    if (j && !cfg.demo) { marcar('approvals', id, { dec, t: Date.now() }); aceptar(j); }
     const y = (S.approvals || []).find((a) => a.id === id) || x;
     if (cardEl) cardEl.classList.add('leaving');
     office.decision(x.agent, dec === 'aprobado');
@@ -452,11 +481,11 @@
   async function resolve(id, btn) {
     const x = (S.alerts || []).find((a) => a.id === id); if (!x) return;
     const el = $('al-' + id); btn.disabled = true; el && el.classList.add('leaving');
-    const before = JSON.parse(JSON.stringify(S));
+    marcar('alerts', id, Date.now());
     x.state = 'resuelta';
     setTimeout(render, RM ? 0 : 500);
-    try { const j = await post({ action: 'resolver', id }); if (j) { S = j; store.set('cache', j); } }
-    catch (e) { S = before; render(); toast('No se pudo marcar. Inténtalo otra vez.'); }
+    try { const j = await post({ action: 'resolver', id }); if (j) aceptar(j); }
+    catch (e) { desmarcar('alerts', id); x.state = 'abierta'; render(); toast('No se pudo marcar. Inténtalo otra vez.'); }
   }
 
   // ---------- navegación ----------
