@@ -1,5 +1,5 @@
 /* La Oficina — service worker: abre sin conexión y gestiona los avisos */
-const VERSION = 'lo-v6';
+const VERSION = 'lo-v7';
 const SHELL = ['./', 'index.html', 'styles.css', 'app.js', 'office.js', 'manifest.webmanifest',
   'icons/icon-192.png', 'icons/icon-512.png', 'icons/apple-touch-icon.png', 'icons/favicon.svg',
   'icons/av_lucia.svg', 'icons/av_ana.svg', 'icons/av_marta.svg', 'icons/av_dani.svg', 'icons/av_marilyn.svg',

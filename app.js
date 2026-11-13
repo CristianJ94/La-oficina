@@ -49,9 +49,9 @@
         gabinete: { name: 'Jefa de gabinete', role: 'Parte diario', status: 'fuera' }
       },
       approvals: [
-        { id: 'd1', agent: 'ana', kind: 'lote', at: ago(15), station: 'VAD7', what: 'Daily metrics VAD7 · 3 conductores con fallos', detail: 'Reclamaciones y POD de los días 8 y 9/11.', priority: 'media', decision: 'pendiente', mensajes: [{ id: '1', nombre: 'Jorge Alonso', text: 'Hola Jorge. Soy Cristian, compañero de Álvaro y Antonio y responsable de calidad y métricas de la estación. Ayer tuviste 1 paquete que el cliente dice no haber recibido: ES2644343859 · Hogar · 31 m ⚠️ · SIN contacto. MARCAJES SIEMPRE EN EL PUNTO y pregunta siempre el nombre de quien recibe.' }, { id: '2', nombre: 'Laura Rosado', text: 'Hola Laura. … 2 fotos POD rechazadas (borrosas).' }, { id: '3', nombre: 'Hugo Villa', text: 'Hola Hugo. … entrega en vecino sin llamada previa.' }] },
+        { id: 'd1', agent: 'ana', kind: 'lote', at: ago(15), station: 'VAD7', what: 'Daily metrics VAD7 · 3 conductores con fallos', detail: 'Reclamaciones y POD de los días 8 y 9/11.', priority: 'media', decision: 'pendiente', mensajes: [{ id: '1', nombre: 'Jorge Alonso', text: 'Hola Jorge. Soy Cristian, compañero de Álvaro y Antonio y responsable de calidad y métricas de la estación. Ayer tuviste 1 paquete que el cliente dice no haber recibido: ES2644343859 · Hogar · 31 m ⚠️ · SIN contacto. MARCAJES SIEMPRE EN EL PUNTO y pregunta siempre el nombre de quien recibe.' }, { id: '2', nombre: 'Laura Rosado', text: 'Hola Laura. … 2 fotos POD rechazadas (borrosas).' }, { id: '3', nombre: 'Hugo Villa', text: 'Hola Hugo. … entrega en vecino sin llamada previa.' }, { id: '4', nombre: 'Pedro Gómez', plantilla: 'baja', plantillaNota: 'en negro el 13/11', text: 'Hola Pedro. … 1 paquete sin contacto.' }] },
         { id: 'w1', agent: 'marilyn', kind: 'libre', at: ago(8), nombre: 'Jorge Ruiz', fechas: ['19/11/2026'], what: 'Jorge Ruiz pide librar el 19/11', detail: 'Motivo: cita en el banco. Centro por confirmar.', priority: 'media', decision: 'pendiente' },
-        { id: 'w2', agent: 'marilyn', kind: 'libre', at: ago(20), nombre: 'Sara Gil', fechas: ['21/11/2026', '22/11/2026'], station: 'VAD4', rrhhName: 'SARA GIL MORENO', what: 'Sara Gil Moreno pide librar el 21/11 y 22/11', detail: 'Motivo: boda familiar. Centro: VAD4.', priority: 'media', decision: 'pendiente' },
+        { id: 'w2', agent: 'marilyn', kind: 'libre', at: ago(20), nombre: 'Sara Gil', fechas: ['29/11/2026', '04/12/2026', '05/12/2026'], station: 'VAD4', rrhhName: 'SARA GIL MORENO', what: 'Sara Gil Moreno pide librar el 29/11, 04/12 y 05/12', detail: 'Motivo: boda familiar. Centro: VAD4.', priority: 'media', decision: 'pendiente' },
         { id: 'e1', agent: 'ana', at: ago(12), what: 'Enviar el Análisis DSP WK45 a Amazon', to: 'Amazon', detail: 'DCR, DSC DPMO y POD con causa raíz y plan de acción. Solo Transporter IDs.', priority: 'alta', decision: 'pendiente' },
         { id: 'e2', agent: 'lucia', at: ago(40), what: 'Responder a Angel sobre asistencia VAD7', to: 'Angel Martín', detail: 'Borrador listo en Outlook.', priority: 'media', decision: 'pendiente' },
         { id: 'e3', agent: 'dani', at: ago(120), what: 'Carpeta MIGRAR 09/11 · 12 diplomas', to: 'Amazon', priority: 'baja', decision: 'aprobado', decidedAt: ago(110) }
@@ -282,12 +282,25 @@
     return `<article class="card${fresh('ap' + x.id + (pending ? 'p' : 'd'))}" id="card-${esc(x.id)}"><div class="head"><img src="${AV(x.agent)}" alt=""><span class="who"><b>${esc(name(x.agent))}</b><small>${esc(rel(x.at))}</small></span>${prio}</div><div class="what">${esc(x.what)}</div>${det || link ? `<div class="det">${esc(det)}${link}</div>` : ''}${foot}</article>`;
   }
 
+  // Días elegidos en una petición de varios días: { idPeticion: Set(fechas que se aceptan) }
+  const selLibre = {};
+  const corta = (f) => String(f).split('/').slice(0, 2).join('/');
+  const diaSemana = (f) => { const [d, m, y] = String(f).split('/').map(Number); return y ? ['dom', 'lun', 'mar', 'mié', 'jue', 'vie', 'sáb'][new Date(y, m - 1, d).getDay()] : ''; };
+  function selDe(x) { if (!selLibre[x.id]) selLibre[x.id] = new Set(x.fechas || []); return selLibre[x.id]; }
+  function pieLibre(x) {
+    const fs = x.fechas || [];
+    if (fs.length < 2) return `<div class="acts"><button class="btn back" data-libre="devuelto" data-id="${esc(x.id)}">Denegar</button><button class="btn approve" data-libre="aprobado" data-id="${esc(x.id)}">Aceptar</button></div>`;
+    const sel = selDe(x), n = fs.filter((f) => sel.has(f)).length;
+    const dias = fs.map((f) => { const on = sel.has(f); return `<button type="button" class="dia ${on ? 'si' : 'no'}" data-dia="${esc(f)}" data-id="${esc(x.id)}" aria-pressed="${on}"><svg viewBox="0 0 24 24" aria-hidden="true">${on ? '<path d="m5 12 4 4 10-10"/>' : '<path d="M7 7l10 10M17 7 7 17"/>'}</svg><span><b>${esc(corta(f))}</b><small>${esc(diaSemana(f))}</small></span></button>`; }).join('');
+    const label = n === fs.length ? 'Aceptar los ' + fs.length : n === 0 ? 'Denegar todos' : 'Aceptar ' + n + ' · denegar ' + (fs.length - n);
+    return `<div class="dias" role="group" aria-label="Elige qué días aceptas">${dias}</div><p class="dias-ayuda">Toca un día para aceptarlo o denegarlo.</p>
+      <div class="acts"><button class="btn back" data-libre="devuelto" data-id="${esc(x.id)}">Denegar todo</button><button class="btn approve" data-libre="elegidos" data-id="${esc(x.id)}">${esc(label)}</button></div>`;
+  }
   function cardLibre(x, pending) {
     const st = x.station ? `<span class="pill centro">${esc(x.station)}</span>` : '<span class="pill esperando">Centro por confirmar</span>';
-    const ok = x.decision === 'aprobado';
-    const foot = pending
-      ? `<div class="acts"><button class="btn back" data-libre="devuelto" data-id="${esc(x.id)}">Denegar</button><button class="btn approve" data-libre="aprobado" data-id="${esc(x.id)}">Aceptar</button></div>`
-      : `<span class="stamp ${ok ? 'ok' : 'no'}"><svg viewBox="0 0 24 24" aria-hidden="true">${ok ? '<path d="m5 12 4 4 10-10"/>' : '<path d="M6 6l12 12M18 6 6 18"/>'}</svg>${ok ? 'Aceptado' + (x.station ? ' · fucsia en ' + esc(x.station) : '') : 'Denegado'} · ${esc(hm(x.decidedAt))}</span>`;
+    const ok = x.decision === 'aprobado', parcial = ok && (x.denegadas || []).length;
+    const foot = pending ? pieLibre(x)
+      : `<span class="stamp ${ok ? 'ok' : 'no'}"><svg viewBox="0 0 24 24" aria-hidden="true">${ok ? '<path d="m5 12 4 4 10-10"/>' : '<path d="M6 6l12 12M18 6 6 18"/>'}</svg>${parcial ? 'Aceptado ' + esc((x.aceptadas || []).map(corta).join(', ')) + ' · denegado ' + esc(x.denegadas.map(corta).join(', ')) : ok ? 'Aceptado' + (x.station ? ' · fucsia en ' + esc(x.station) : '') : 'Denegado'} · ${esc(hm(x.decidedAt))}</span>`;
     const msg = !pending && x.mensaje ? `<div class="det">${(S.outbox || []).some((o) => o.approvalId === x.id && o.sent) ? 'Mensaje enviado' : 'Marilyn enviará'}: «${esc(x.mensaje)}»</div>` : '';
     return `<article class="card libre${fresh('ap' + x.id + (pending ? 'p' : 'd'))}" id="card-${esc(x.id)}"><div class="head"><img src="${AV(x.agent)}" alt=""><span class="who"><b>${esc(name(x.agent))} · día libre</b><small>${esc(rel(x.at))}</small></span>${st}</div><div class="what">${esc(x.what)}</div>${x.detail ? `<div class="det">${esc(x.detail)}</div>` : ''}${msg}${foot}</article>`;
   }
@@ -296,21 +309,27 @@
     const ms = x.mensajes || [], ok = x.decision === 'aprobado';
     const st = x.station ? `<span class="pill centro">${esc(x.station)}</span>` : '';
     const link = x.link ? ` <a href="${esc(x.link)}" target="_blank" rel="noopener">Abrir</a>` : '';
-    const list = pending ? `<details class="lote"><summary>Ver los ${ms.length} mensajes · quita los que no quieras enviar</summary>${ms.map((m) => `<label class="msg"><input type="checkbox" checked data-lote="${esc(x.id)}" value="${esc(m.id)}"><span><b>${esc(m.nombre || m.tid)}</b><span class="tx">${esc(m.text)}</span></span></label>`).join('')}</details>` : '';
+    const PL = { baja: 'Ya no está con nosotros', no_aparece: 'No aparece en el RRHH', dudoso: 'Revisar en el RRHH' };
+    const flag = (m) => m.plantilla && m.plantilla !== 'activo';
+    const nFlag = ms.filter(flag).length;
+    const aviso = pending && nFlag ? `<div class="det warnline">${nFlag === 1 ? '1 conductor' : nFlag + ' conductores'} sin marcar: según el RRHH ya no ${nFlag === 1 ? 'está' : 'están'} con nosotros o no ${nFlag === 1 ? 'aparece' : 'aparecen'}. Márcalo si quieres enviarlo igualmente.</div>` : '';
+    const list = pending ? `<details class="lote"${nFlag ? ' open' : ''}><summary>Ver los ${ms.length} mensajes · quita los que no quieras enviar</summary>${ms.map((m) => `<label class="msg${flag(m) ? ' off' : ''}"><input type="checkbox"${flag(m) ? '' : ' checked'} data-lote="${esc(x.id)}" data-flag="${flag(m) ? 1 : ''}" value="${esc(m.id)}"><span><b>${esc(m.nombre || m.tid)}</b>${flag(m) ? `<span class="rrhh ${esc(m.plantilla)}">${esc(PL[m.plantilla] || 'Revisar')}${m.plantillaNota ? ' · ' + esc(m.plantillaNota) : ''}</span>` : ''}<span class="tx">${esc(m.text)}</span></span></label>`).join('')}</details>` : '';
     const foot = pending
       ? `<div class="acts"><button class="btn back" data-dec="devuelto" data-id="${esc(x.id)}">Devolver</button><button class="btn approve" data-lotego="${esc(x.id)}">Aprobar y enviar</button></div>`
       : `<span class="stamp ${ok ? 'ok' : 'no'}"><svg viewBox="0 0 24 24" aria-hidden="true">${ok ? '<path d="m5 12 4 4 10-10"/>' : '<path d="M6 6l12 12M18 6 6 18"/>'}</svg>${ok ? 'Aprobado · ' + (x.enviados ?? ms.length) + ' a Marilyn' : 'Devuelto'} · ${esc(hm(x.decidedAt))}</span>`;
-    return `<article class="card lote${fresh('ap' + x.id + (pending ? 'p' : 'd'))}" id="card-${esc(x.id)}"><div class="head"><img src="${AV(x.agent)}" alt=""><span class="who"><b>${esc(name(x.agent))} · mensajes a conductores</b><small>${esc(rel(x.at))}</small></span>${st}</div><div class="what">${esc(x.what)}</div>${x.detail || link ? `<div class="det">${esc(x.detail || '')}${link}</div>` : ''}${list}${foot}</article>`;
+    return `<article class="card lote${fresh('ap' + x.id + (pending ? 'p' : 'd'))}" id="card-${esc(x.id)}"><div class="head"><img src="${AV(x.agent)}" alt=""><span class="who"><b>${esc(name(x.agent))} · mensajes a conductores</b><small>${esc(rel(x.at))}</small></span>${st}</div><div class="what">${esc(x.what)}</div>${x.detail || link ? `<div class="det">${esc(x.detail || '')}${link}</div>` : ''}${aviso}${list}${foot}</article>`;
   }
   async function decideLote(id) {
     const x = (S.approvals || []).find((a) => a.id === id); if (!x) return;
-    const quitar = [...document.querySelectorAll(`input[data-lote="${CSS.escape(id)}"]`)].filter((i) => !i.checked).map((i) => i.value);
+    const boxes = [...document.querySelectorAll(`input[data-lote="${CSS.escape(id)}"]`)];
+    const quitar = boxes.filter((i) => !i.checked).map((i) => i.value);
+    const forzar = boxes.filter((i) => i.checked && i.dataset.flag).map((i) => i.value);   // bajas que Cristian quiere enviar igualmente
     const n = (x.mensajes || []).length - quitar.length;
     if (!n) { toast('Has quitado todos los mensajes. Usa «Devolver».'); return; }
     const cardEl = $('card-' + id); cardEl && cardEl.querySelectorAll('button').forEach((b) => (b.disabled = true));
     try {
       if (cfg.demo) { x.decision = 'aprobado'; x.decidedAt = new Date().toISOString(); x.enviados = n; }
-      else { const j = await post({ action: 'decidir', id, decision: 'aprobado', quitar }); marcar('approvals', id, { dec: 'aprobado', t: Date.now() }); if (j) aceptar(j); }
+      else { const j = await post({ action: 'decidir', id, decision: 'aprobado', quitar, forzar }); marcar('approvals', id, { dec: 'aprobado', t: Date.now() }); if (j) aceptar(j); }
     } catch (e) { render(); toast('No se pudo guardar. Revisa la conexión e inténtalo otra vez.'); return; }
     cardEl && cardEl.classList.add('leaving');
     office.decision(x.agent, true);
@@ -452,6 +471,14 @@
   // Días libres: espera al servidor (pinta en RRHH) y, si hace falta, pregunta centro o nombre.
   async function decideLibre(id, dec, extra) {
     const x = (S.approvals || []).find((a) => a.id === id); if (!x) return;
+    if (dec === 'elegidos') {
+      const fs = x.fechas || [], sel = selDe(x), aceptar = fs.filter((f) => sel.has(f));
+      if (!aceptar.length) dec = 'devuelto';
+      else { dec = 'aprobado'; if (aceptar.length < fs.length) extra = Object.assign({}, extra, { aceptar }); }
+    } else if (dec === 'aprobado' && (x.fechas || []).length > 1 && selLibre[id]) {
+      const aceptar = x.fechas.filter((f) => selLibre[id].has(f));
+      if (aceptar.length && aceptar.length < x.fechas.length) extra = Object.assign({}, extra, { aceptar });
+    }
     const cardEl = $('card-' + id); cardEl && cardEl.querySelectorAll('button').forEach((b) => (b.disabled = true));
     if (dec === 'aprobado' && !x.station && !(extra && extra.station)) { askCentro(x, dec); return; }
     let j;
@@ -468,7 +495,9 @@
     const y = (S.approvals || []).find((a) => a.id === id) || x;
     if (cardEl) cardEl.classList.add('leaving');
     office.decision(x.agent, dec === 'aprobado');
-    toast(dec === 'aprobado' ? 'Marcado en fucsia en RRHH ' + (y.station || '') + '. Marilyn se lo dirá en su próxima ronda.' : 'Denegado. Marilyn se lo dirá en su próxima ronda.');
+    const parte = extra && extra.aceptar ? ' (' + extra.aceptar.map(corta).join(', ') + ')' : '';
+    toast(dec === 'aprobado' ? 'Marcado en fucsia en RRHH ' + (y.station || '') + parte + '. Marilyn se lo dirá en su próxima ronda.' : 'Denegado. Marilyn se lo dirá en su próxima ronda.');
+    delete selLibre[id];
     setTimeout(render, RM ? 0 : 900);
   }
   function demoLibre(x, dec, extra) {
@@ -476,8 +505,10 @@
     if (extra.nombre) x.rrhhName = extra.nombre;
     x.decision = dec; x.decidedAt = new Date().toISOString();
     const pila = (x.nombre || '').split(' ')[0], f = (x.fechas || []).map((t) => t.split('/').slice(0, 2).join('/')).join(' y ');
-    x.mensaje = dec === 'aprobado' ? `Hola ${pila}, se ha aceptado tu petición de día libre para el ${f}. ¡Un saludo!` : `Hola ${pila}, se ha denegado tu solicitud de día libre para el ${f} por motivos de volumen. Un saludo.`;
-    (S.log = S.log || []).unshift({ id: 'c' + Date.now(), agent: 'cristian', at: x.decidedAt, text: (dec === 'aprobado' ? 'aceptó: ' : 'denegó: ') + x.what, state: 'ok' });
+    const ac = extra.aceptar || (dec === 'aprobado' ? x.fechas || [] : []); x.aceptadas = ac; x.denegadas = (x.fechas || []).filter((t) => !ac.includes(t));
+    if (dec === 'aprobado' && x.denegadas.length) x.mensaje = `Hola ${pila}, se ha aceptado tu petición de día libre para el ${ac.map(corta).join(' y ')}. El ${x.denegadas.map(corta).join(' y ')} se ha denegado por motivos de volumen. Un saludo.`;
+    else x.mensaje = dec === 'aprobado' ? `Hola ${pila}, se ha aceptado tu petición de día libre para el ${f}. ¡Un saludo!` : `Hola ${pila}, se ha denegado tu solicitud de día libre para el ${f} por motivos de volumen. Un saludo.`;
+    (S.log = S.log || []).unshift({ id: 'c' + Date.now(), agent: 'cristian', at: x.decidedAt, text: (dec === 'aprobado' && x.denegadas.length ? 'aceptó el ' + ac.map(corta).join(', ') + ' y denegó el ' + x.denegadas.map(corta).join(', ') + ': ' : dec === 'aprobado' ? 'aceptó: ' : 'denegó: ') + x.what, state: 'ok' });
     return null;
   }
   // Ventana para elegir centro (y nombre en RRHH si no lo encuentra)
@@ -503,7 +534,7 @@
     if (!c) { toast('Elige el centro'); return; }
     const nombre = $('p-nombre').value.trim();
     dlg.close();
-    decideLibre(dlg.dataset.pid, dlg.dataset.pdec, { station: c.dataset.c, nombre });
+    decideLibre(dlg.dataset.pid, dlg.dataset.pdec === 'elegidos' ? 'aprobado' : dlg.dataset.pdec, { station: c.dataset.c, nombre });
   });
 
   async function resolve(id, btn) {
@@ -529,6 +560,14 @@
   window.addEventListener('popstate', () => go((location.hash || '#oficina').slice(1), false));
   document.addEventListener('click', (e) => {
     const ig = e.target.closest('[data-inf-go]'); if (ig) { infFilter = ig.dataset.infGo; store.set('infFilter', infFilter); go('informes'); renderInformes(); return; }
+    const dia = e.target.closest('[data-dia]');
+    if (dia) {
+      const x = (S.approvals || []).find((a) => a.id === dia.dataset.id); if (!x) return;
+      const sel = selDe(x), f = dia.dataset.dia; sel.has(f) ? sel.delete(f) : sel.add(f);
+      const card = $('card-' + x.id), old = card && card.querySelector('.dias');
+      if (old) { old.nextElementSibling.remove(); old.nextElementSibling.remove(); old.outerHTML = pieLibre(x); }
+      return;
+    }
     const t = e.target.closest('[data-go],[data-agent],[data-dec],[data-libre],[data-lotego],[data-resolve],[data-filter],[data-inf]');
     if (!t) return;
     if (t.dataset.go) go(t.dataset.go);

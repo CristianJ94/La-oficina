@@ -360,3 +360,21 @@ details.lote .msg:has(input:not(:checked)) { opacity: .45; }
 @keyframes talkIn { from { opacity: 0; transform: translateY(8px) scale(.6); } 60% { transform: translateY(-2px) scale(1.04); } }
 @keyframes talkOut { to { opacity: 0; transform: translateY(4px) scale(.85); } }
 @media (prefers-reduced-motion: reduce) { .talk-in, .talk.bye .talk-in { animation: none; } }
+
+/* ---------- días sueltos de una petición ---------- */
+.dias { display: flex; flex-wrap: wrap; gap: 8px; }
+.dia { display: inline-flex; align-items: center; gap: 8px; min-height: 48px; padding: 6px 14px 6px 10px; border-radius: 14px; border: 2px solid transparent; font: inherit; cursor: pointer;
+  transition: background-color .2s var(--ease), border-color .2s var(--ease), transform .15s var(--ease); box-shadow: 0 3px 0 rgba(27, 42, 74, .12); }
+.dia:active { transform: translateY(2px); box-shadow: 0 1px 0 rgba(27, 42, 74, .12); }
+.dia svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 2.6; stroke-linecap: round; stroke-linejoin: round; flex: none; }
+.dia span { display: flex; flex-direction: column; line-height: 1.1; text-align: left; }
+.dia b { font-size: 16px; font-variant-numeric: tabular-nums; } .dia small { font-size: 11px; opacity: .8; }
+.dia.si { background: #FFE5FF; border-color: #ff00ff; color: #8A0F8A; }
+.dia.no { background: var(--bad-bg); border-color: transparent; color: var(--bad-ink); }
+.dia.no b { text-decoration: line-through; text-decoration-thickness: 2px; }
+.dias-ayuda { margin: 0; font-size: 12px; color: var(--muted); }
+/* ---------- lote: bajas según el RRHH ---------- */
+.warnline { color: var(--warn-ink); background: var(--warn-bg); padding: 8px 10px; border-radius: 10px; }
+label.msg.off { opacity: .75; }
+.rrhh { display: inline-block; margin: 2px 0 4px; padding: 2px 8px; border-radius: 8px; font-size: 12px; font-weight: 700; background: var(--warn-bg); color: var(--warn-ink); }
+.rrhh.baja { background: #1F2430; color: #fff; }
