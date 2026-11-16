@@ -53,6 +53,12 @@
     <header class="top"><h1 id="t-aprobar">Aprobaciones</h1><span class="meta" id="apr-meta"></span></header>
     <p class="lead">Nada sale de la oficina sin tu sí. Revisa, aprueba o devuélvelo al agente.</p>
     <div class="cards" id="apr-list"></div>
+    <section class="cola" id="cola" hidden aria-labelledby="cola-t">
+      <h2 class="sub" id="cola-t">Mensajes que no salen</h2>
+      <p class="cola-lead" id="cola-lead"></p>
+      <div class="cola-acts" id="cola-acts"></div>
+      <ul class="cola-list" id="cola-list"></ul>
+    </section>
     <h2 class="sub" id="apr-done-t" hidden>Hechas hoy</h2>
     <div class="cards" id="apr-done"></div>
   </main>
@@ -85,7 +91,7 @@
 
     <section class="panel">
       <h2>Avisos</h2>
-      <label class="switch"><span><b>Avisarme</b><small>Cuando un agente te pida aprobación o salte una alerta grave, mientras la app esté abierta o en segundo plano.</small></span><input type="checkbox" id="avisos"></label>
+      <label class="switch"><span><b>Avisarme</b><small>Cuando un agente te pida aprobación, Marilyn no pueda enviar un mensaje o salte una alerta grave, mientras la app esté abierta o en segundo plano.</small></span><input type="checkbox" id="avisos"></label>
     </section>
 
     <section class="panel">

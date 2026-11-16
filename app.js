@@ -91,6 +91,11 @@
           { k: 'borrador', at: ago(119), text: 'Respuesta al scorecard VAD4 WK45', station: 'VAD4' }] },
         { id: 'r5', agent: 'marilyn', inicio: ago(135), fin: ago(133), status: 'libre', resumen: 'Sin novedades', cifras: { 'Enviados': 0, 'Chats leídos': 0 }, items: [] }
       ],
+      outbox: [
+        { id: 'o1', para: 'Ricardo Rodriguez', station: 'DMZ4', origen: 'Daily metrics DMZ4 · 15 conductores', text: 'Hola Ricardo. Te escribo en relación a tus métricas de los últimos días…', at: ago(60 * 24 * 6), sent: false, parado: true, intentos: 2, ultimoError: 'Sin teléfono en el Directorio y hay 2 chats «Ricardo Rodriguez»; no sé cuál es' },
+        { id: 'o2', para: 'Ali Tahiri', station: 'VAD4', origen: 'Daily metrics VAD4 · 4 conductores', text: 'Hola Ali…', at: ago(60 * 24 * 6), sent: false, parado: true, intentos: 2, ultimoError: 'Sin teléfono en el Directorio y ningún chat con ese nombre' },
+        { id: 'o3', para: 'Jhony Manuel', station: 'VAD7', origen: 'Mensajes DA WK45 VAD7', text: 'Hola Jhony…', at: ago(60 * 24 * 5), sent: false, intentos: 1, ultimoError: '' }
+      ],
       log: [
         { id: 'l0', agent: 'marilyn', at: ago(8), text: 'leyó 9 chats: 2 peticiones de día libre, 1 aviso de retraso', state: 'pendiente' },
         { id: 'l1', agent: 'lucia', at: ago(4), text: 'repartió 23 emails: 4 a Ana, 6 a Marta, 3 a Dani', state: 'ok' },
@@ -199,6 +204,10 @@
   async function notify(st) {
     const fresh = [];
     for (const x of st.approvals || []) if ((x.decision || 'pendiente') === 'pendiente' && !notified.has('ap' + x.id)) { notified.add('ap' + x.id); fresh.push({ t: name(x.agent) + ' te pide aprobación', b: x.what, tag: 'ap' + x.id }); }
+    const nuevosParados = (st.outbox || []).filter((o) => o.parado && !o.sent && !o.cancelado && !notified.has('ob' + o.id));
+    nuevosParados.forEach((o) => notified.add('ob' + o.id));
+    if (nuevosParados.length) fresh.push({ t: nuevosParados.length === 1 ? 'Marilyn no pudo enviar un mensaje' : 'Marilyn no pudo enviar ' + nuevosParados.length + ' mensajes',
+      b: nuevosParados.map((o) => o.para || o.chat).slice(0, 4).join(', ') + (nuevosParados[0].ultimoError ? ' · ' + nuevosParados[0].ultimoError : ''), tag: 'ob' + Date.now() });
     for (const x of st.alerts || []) if (x.level === 'rojo' && (x.state || 'abierta') === 'abierta' && !notified.has('al' + x.id)) { notified.add('al' + x.id); fresh.push({ t: 'Alerta de ' + name(x.agent), b: x.text, tag: 'al' + x.id }); }
     store.set('notified', Array.from(notified).slice(-300));
     if (!ready || st.demo || !fresh.length) return;
@@ -256,9 +265,71 @@
     bump($('badge-al'), red); $('badge-al').hidden = !red;
 
     renderApprovals(pend);
+    renderCola();
+    marcarIcono(pend.length + parados().length);
     renderLog(open);
     renderInformes();
     if ($('sheet').open && $('sheet').dataset.id) fillAgent($('sheet').dataset.id);
+  }
+
+  // ---------- cola de Marilyn: mensajes parados y antiguos ----------
+  const porSalir = () => (S.outbox || []).filter((o) => !o.sent && !o.cancelado);
+  const parados = () => porSalir().filter((o) => o.parado);
+  const dias = (iso) => Math.floor((Date.now() - Date.parse(iso || 0)) / 864e5);
+  function renderCola() {
+    const sec = $('cola'); if (!sec) return;
+    const ps = porSalir(), par = ps.filter((o) => o.parado), viejos = ps.filter((o) => !o.parado && dias(o.at) >= 3);
+    const mostrar = par.concat(viejos);
+    sec.hidden = !mostrar.length;
+    if (!mostrar.length) return;
+    $('cola-lead').textContent = (par.length ? par.length + (par.length === 1 ? ' mensaje parado' : ' mensajes parados') + ': Marilyn lo intentó 2 veces y no pudo. ' : '') +
+      (viejos.length ? viejos.length + (viejos.length === 1 ? ' lleva' : ' llevan') + ' más de 3 días en la cola. ' : '') + 'Reintenta cuando lo arregles o cancela lo que ya no tenga sentido.';
+    const b = [];
+    if (par.length > 1) b.push(`<button class="btn sm" data-cola="reintentar" data-todos="parados">Reintentar los ${par.length}</button>`, `<button class="btn back sm danger" data-cola="cancelar" data-todos="parados">Cancelar los ${par.length} parados</button>`);
+    if (ps.some((o) => dias(o.at) >= 3)) b.push(`<button class="btn back sm danger" data-cola="cancelar" data-todos="antiguos">Cancelar los de más de 3 días</button>`);
+    $('cola-acts').innerHTML = b.join('');
+    $('cola-list').innerHTML = mostrar.map((o) => {
+      const edad = dias(o.at), estado = o.parado ? `<span class="pill alerta">Parado · ${o.intentos || 2} intentos</span>` : `<span class="pill esperando">En cola · ${edad} días</span>`;
+      return `<li class="cola-item${o.parado ? ' parado' : ''}"><div class="ci-top"><b>${esc(o.para || o.chat || '¿?')}</b>${o.station ? `<span class="pill centro">${esc(o.station)}</span>` : ''}${estado}</div>
+        <div class="ci-meta">${esc(o.origen || 'Mensaje')} · ${esc(edad === 0 ? 'hoy' : edad === 1 ? 'ayer' : 'hace ' + edad + ' días')}</div>
+        ${o.ultimoError ? `<div class="ci-err">${esc(o.ultimoError)}</div>` : ''}
+        <details class="ci-txt"><summary>Ver mensaje</summary><p>${esc(o.text || '')}</p></details>
+        <div class="acts">${o.parado ? `<button class="btn sm" data-cola="reintentar" data-ids="${esc(o.id)}">Reintentar</button>` : ''}<button class="btn back sm danger" data-cola="cancelar" data-ids="${esc(o.id)}">Cancelar</button></div></li>`;
+    }).join('');
+  }
+  async function cola(op, ids, todos, btn) {
+    const lista = ids ? ids.split(',') : null;
+    const sel = porSalir().filter((o) => lista ? lista.includes(o.id) : todos === 'parados' ? o.parado : todos === 'antiguos' ? dias(o.at) >= 3 : true);
+    if (!sel.length) return;
+    if (op === 'cancelar' && sel.length > 1 && !window.confirm('¿Cancelar ' + sel.length + ' mensajes? Marilyn ya no los enviará.')) return;
+    if (btn) btn.disabled = true;
+    const aplicar = (st) => { const ids2 = new Set(sel.map((o) => o.id)); (st.outbox || []).forEach((o) => { if (!ids2.has(o.id)) return; if (op === 'cancelar') { o.cancelado = true; o.parado = false; } else { o.parado = false; o.intentos = 0; o.ultimoError = ''; } }); return st; };
+    try {
+      const j = await post({ action: 'cola', op, ids: lista || [], todos: lista ? '' : todos });
+      if (j) aceptar(j); else { const next = aplicar(JSON.parse(JSON.stringify(S))); setState(next); }
+      toast(op === 'cancelar' ? (sel.length === 1 ? 'Mensaje cancelado' : sel.length + ' mensajes cancelados') : (sel.length === 1 ? 'Marilyn lo intentará en su próxima ronda' : 'Marilyn los intentará en su próxima ronda'));
+    } catch (err) { toast(err.message || 'No pude hablar con la oficina'); if (btn) btn.disabled = false; }
+  }
+
+  // ---------- contador en el icono (pestaña, barra de direcciones y app instalada) ----------
+  const icono = { base: null, link: null, n: -1 };
+  function marcarIcono(n) {
+    if (n === icono.n) return; icono.n = n;
+    document.title = (n ? '(' + n + ') ' : '') + 'La Oficina';
+    try { if ('setAppBadge' in navigator) n ? navigator.setAppBadge(n) : navigator.clearAppBadge(); } catch (e) {}
+    if (!icono.link) icono.link = document.querySelector('link[rel="icon"]');
+    if (!icono.link) return;
+    if (!n) { icono.link.type = 'image/svg+xml'; icono.link.href = 'icons/favicon.svg'; return; }
+    const pintar = () => {
+      const c = document.createElement('canvas'); c.width = c.height = 64; const g = c.getContext('2d');
+      g.drawImage(icono.base, 0, 0, 64, 64);
+      const t = n > 9 ? '9+' : String(n), r = 18, x = 64 - r, y = r;
+      g.beginPath(); g.arc(x, y, r, 0, 2 * Math.PI); g.fillStyle = '#E5252A'; g.fill(); g.lineWidth = 4; g.strokeStyle = '#fff'; g.stroke();
+      g.fillStyle = '#fff'; g.font = 'bold ' + (t.length > 1 ? 20 : 26) + 'px system-ui, sans-serif'; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText(t, x, y + 1);
+      icono.link.type = 'image/png'; icono.link.href = c.toDataURL('image/png');
+    };
+    if (icono.base) return pintar();
+    const img = new Image(); img.onload = () => { icono.base = img; if (icono.n) pintar(); }; img.src = 'icons/icon-192.png';
   }
 
   function renderApprovals(pend) {
@@ -568,6 +639,7 @@
       if (old) { old.nextElementSibling.remove(); old.nextElementSibling.remove(); old.outerHTML = pieLibre(x); }
       return;
     }
+    const cb = e.target.closest('[data-cola]'); if (cb) { cola(cb.dataset.cola, cb.dataset.ids || '', cb.dataset.todos || '', cb); return; }
     const t = e.target.closest('[data-go],[data-agent],[data-dec],[data-libre],[data-lotego],[data-resolve],[data-filter],[data-inf]');
     if (!t) return;
     if (t.dataset.go) go(t.dataset.go);
@@ -700,7 +772,8 @@
   // ---------- arranque ----------
   go((location.hash || '#oficina').slice(1), false);
   render(); renderInstall(); fetchState();
-  setInterval(() => { if (!document.hidden) fetchState(); }, 20000);
+  let ultimaLectura = 0;
+  setInterval(() => { const cada = document.hidden ? 60000 : 20000; if (Date.now() - ultimaLectura >= cada - 500) { ultimaLectura = Date.now(); fetchState(); } }, 20000);   // en segundo plano, cada minuto: así llegan los avisos
   setInterval(() => { if (!document.hidden) render(); }, 60000);
   document.addEventListener('visibilitychange', () => { if (!document.hidden) fetchState(); });
   if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(() => {});

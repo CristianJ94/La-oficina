@@ -378,3 +378,22 @@ details.lote .msg:has(input:not(:checked)) { opacity: .45; }
 label.msg.off { opacity: .75; }
 .rrhh { display: inline-block; margin: 2px 0 4px; padding: 2px 8px; border-radius: 8px; font-size: 12px; font-weight: 700; background: var(--warn-bg); color: var(--warn-ink); }
 .rrhh.baja { background: #1F2430; color: #fff; }
+
+/* cola de Marilyn: mensajes parados */
+.cola { margin-top: 22px; display: flex; flex-direction: column; gap: 10px; }
+.cola-lead { font-size: 13px; color: var(--ink-2); margin: 0; }
+.cola-acts { display: flex; flex-wrap: wrap; gap: 8px; }
+.cola-acts:empty { display: none; }
+.cola-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 10px; }
+.cola-item { border: 1px solid var(--line); border-radius: 16px; padding: 12px 14px; background: #fff; display: flex; flex-direction: column; gap: 6px; }
+.cola-item.parado { border-color: #F3B9B0; background: #FFF7F5; }
+.ci-top { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.ci-top b { font-size: 15px; margin-right: auto; }
+.ci-meta { font-size: 12px; color: var(--muted); }
+.ci-err { font-size: 13px; color: #9A2A1A; }
+.ci-txt summary { font-size: 13px; font-weight: 600; color: var(--accent-ink); cursor: pointer; }
+.ci-txt p { white-space: pre-wrap; font-size: 13px; margin: 6px 0 0; color: var(--ink-2); }
+.cola-item .acts { justify-content: flex-end; }
+.btn.sm { min-height: 36px; padding: 6px 14px; font-size: 13px; }
+.btn.danger { color: #B3261E; }
+.cola .btn { flex: none; }
